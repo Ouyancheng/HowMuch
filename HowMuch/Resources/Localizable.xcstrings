@@ -715,6 +715,9 @@
     "Checking iCloud" : {
       "comment" : "Banner title"
     },
+    "Checking whether iCloud sync is available." : {
+      "comment" : "Banner message"
+    },
     "Checking…" : {
       "comment" : "iCloud account status",
       "localizations" : {
@@ -1029,6 +1032,9 @@
         }
       }
     },
+    "Data stays on this device. Sign in to iCloud to sync across your devices and share a family ledger." : {
+      "comment" : "Signed-out local data explanation"
+    },
     "Data Store" : {
       "comment" : "Field"
     },
@@ -1086,8 +1092,17 @@
     "Delete Expense" : {
       "comment" : "Button"
     },
+    "Delete Ledger" : {
+      "comment" : "Button"
+    },
     "Delete this expense?" : {
       "comment" : "Alert"
+    },
+    "Delete this ledger?" : {
+      "comment" : "Alert"
+    },
+    "Deletes this ledger and its expenses, categories, payment methods, and receipts. This cannot be undone." : {
+      "comment" : "Ledger deletion explanation"
     },
     "Details" : {
       "comment" : "Form section",
@@ -1556,7 +1571,7 @@
 
     },
     "iCloud" : {
-      "comment" : "Field\nSection\nSettings tab",
+      "comment" : "Field\nSection",
       "localizations" : {
         "zh-Hans" : {
           "stringUnit" : {
@@ -1920,6 +1935,9 @@
     "Keep at least one payment method." : {
       "comment" : "Validation"
     },
+    "Keep at least one personal ledger." : {
+      "comment" : "Ledger deletion error"
+    },
     "Keep Historical Values" : {
       "comment" : "Currency action",
       "localizations" : {
@@ -2002,6 +2020,9 @@
           }
         }
       }
+    },
+    "Leave this family ledger from Family Sharing to remove it from this device." : {
+      "comment" : "Ledger deletion error"
     },
     "Leave this family ledger?" : {
       "comment" : "Confirmation title"
@@ -2306,7 +2327,7 @@
       }
     },
     "New Expense" : {
-      "comment" : "Menu item\nScreen title\nToolbar",
+      "comment" : "Screen title\nToolbar",
       "localizations" : {
         "zh-Hans" : {
           "stringUnit" : {
@@ -2323,7 +2344,7 @@
       }
     },
     "New Family Ledger" : {
-      "comment" : "List action\nMenu item\nScreen title\nSidebar action\nToolbar",
+      "comment" : "List action\nScreen title\nSidebar action\nToolbar",
       "localizations" : {
         "zh-Hans" : {
           "stringUnit" : {
@@ -2357,7 +2378,7 @@
       }
     },
     "New Personal Ledger" : {
-      "comment" : "List action\nMenu item\nScreen title\nSettings action\nSidebar action\nToolbar",
+      "comment" : "List action\nScreen title\nSettings action\nSidebar action\nToolbar",
       "localizations" : {
         "zh-Hans" : {
           "stringUnit" : {
@@ -3268,9 +3289,6 @@
         }
       }
     },
-    "Sign in to iCloud to unlock your data." : {
-      "comment" : "Persistence status"
-    },
     "Sign in to iCloud with your Apple Account in %@, then return to HowMuch." : {
       "comment" : "Platform-correct iCloud sign-in guidance",
       "localizations" : {
@@ -3425,6 +3443,9 @@
           }
         }
       }
+    },
+    "Stop sharing this family ledger first. You can delete the private copy after that." : {
+      "comment" : "Ledger deletion error"
     },
     "Stop sharing this family ledger?" : {
       "comment" : "Confirmation title"
@@ -3671,7 +3692,7 @@
 
     },
     "This build is not configured for CloudKit." : {
-      "comment" : "Persistence status\niCloud status"
+      "comment" : "iCloud status"
     },
     "This build keeps data on this device. Choose a Team in Xcode and enable CloudKit to turn on iCloud sync." : {
 
@@ -3766,6 +3787,12 @@
     },
     "This payment method does not belong to the selected ledger." : {
       "comment" : "Persistence mutation error"
+    },
+    "This permanently deletes %lld expenses and the ledger. This cannot be undone." : {
+      "comment" : "Ledger deletion confirmation"
+    },
+    "This permanently deletes the ledger. No expenses are recorded yet." : {
+      "comment" : "Ledger deletion confirmation"
     },
     "This shared ledger and its expenses will be removed from this device. You will not keep a local copy." : {
       "comment" : "Confirmation message"
@@ -3933,9 +3960,6 @@
     "Verify your iCloud account before retrying." : {
       "comment" : "Persistence error"
     },
-    "Verifying your iCloud account…" : {
-      "comment" : "Persistence status"
-    },
     "View receipt" : {
       "comment" : "Button"
     },
@@ -4019,11 +4043,11 @@
         }
       }
     },
+    "You can keep using the app. Sync stays off until your iCloud account is verified." : {
+      "comment" : "Banner message"
+    },
     "Your changes could not be saved: %@" : {
       "comment" : "Persistence mutation error"
-    },
-    "Your data stays locked until the iCloud account is verified." : {
-
     },
     "Your iCloud account could not be verified. Sharing was not changed: %@" : {
       "comment" : "Share error"

@@ -5,9 +5,10 @@ HowMuch is a personal and household spend tracker for iPhone and Mac. It records
 ## Data, privacy, and sharing
 
 - Personal ledgers live in the user's private CloudKit database. Family ledgers use a shared CloudKit database and can be invited through the system share sheet; this is not Apple Family Sharing.
-- Persistent stores are scoped to a verified iCloud account fingerprint. Confirmed account changes lock and fully unmount the old stores before another account can open; transient iCloud checks keep the last verified data mounted.
+- Persistent stores are scoped to a verified iCloud account fingerprint. Without a signed-in iCloud account the app stays usable on a local private store and does not sync or share. Signing in remounts that account's scoped stores; a confirmed account change fully unmounts the previous stores first. Transient iCloud checks keep the last usable data mounted.
 - A participant with read-only permission can view a shared ledger but cannot add, edit, delete, reorder, import over, or change its reporting currency.
 - Stopping a share keeps the owner's ledger as private data. Leaving a share removes the participant's shared copy after CloudKit confirms the operation. Failed stop/leave operations retain local data and can be retried; they are not treated as success.
+- Unshared ledgers can be deleted from ledger settings, the ledger list, or the sidebar. The last personal ledger is kept. A shared family ledger must be stopped (owner) or left (participant) first so a local delete cannot synchronize away the shared graph.
 - CloudKit sync is not a backup. Deletions and account changes can synchronize. Export archives regularly and store them separately.
 
 Without CloudKit entitlements, the Debug Mac configuration uses `HowMuch-macOS-local.entitlements` and a local store under the app's Application Support directory. Local mode has no CloudKit account access or sync, but retains sandboxed user-selected read/write access for archive import and export. Enabling a Team later may adopt the legacy private/local store once: a durable base claim binds that retained source to exactly one verified account. Legacy `shared.sqlite` is never adopted automatically and remains available only for explicit recovery, so a later account starts without another account's data.
@@ -70,3 +71,4 @@ The GitHub workflow uses the `macos-26` runner and selects its newest installed 
 - [ ] Test archive export/import with and without receipts, all three import modes, and a separate backup copy.
 - [ ] On iOS 26 and macOS 26, test compact/regular layouts, keyboard and VoiceOver navigation, Dynamic Type, share sheets, file import/export, and accessibility audit results.
 - [ ] Confirm signed device sync after relaunch and account switching; do not describe CloudKit sync as backup.
+- [ ] Delete an extra personal ledger and an unshared family ledger; confirm the last personal ledger and a shared family ledger cannot be deleted in place.

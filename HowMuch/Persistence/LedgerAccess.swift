@@ -40,6 +40,13 @@ enum LedgerAccess: Equatable {
         self == .readWriteParticipant || self == .readOnlyParticipant
     }
 
+    /// Shared ledgers are never deleted in place: an owner must stop sharing
+    /// first, and a participant must leave. That avoids a local delete
+    /// synchronizing away everyone else's copy.
+    var canDeleteUnsharedLedger: Bool {
+        self == .personalOwner || self == .unsharedOwner
+    }
+
     var isShared: Bool {
         switch self {
         case .sharedOwner, .readWriteParticipant, .readOnlyParticipant:

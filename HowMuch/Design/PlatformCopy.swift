@@ -23,4 +23,11 @@ enum PlatformCopy {
         String(localized: "This build keeps data on this device. Choose a Team in Xcode and enable CloudKit to turn on iCloud sync.")
         #endif
     }
+
+    static var signedOutLocalDetail: String {
+        String(
+            localized: "Data stays on this device. Sign in to iCloud to sync across your devices and share a family ledger.",
+            comment: "Signed-out local data explanation"
+        )
+    }
 }

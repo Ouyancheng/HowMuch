@@ -146,6 +146,8 @@ final class PersistenceController: ObservableObject {
     private let testStoreType: TestStoreType?
     private let includeSharedTestStore: Bool
     private let localOnlyMode: Bool
+    private let supportsCloudKit: Bool
+    private var offlineLocalStoreActive = false
     private let applicationSupportDirectoryOverride: URL?
     private var configuredSharedStoreURLs: Set<URL> = []
     private var remoteChangeObserver: NSObjectProtocol?
@@ -156,13 +158,15 @@ final class PersistenceController: ObservableObject {
 
     var viewContext: NSManagedObjectContext { container.viewContext }
     var isDataAvailable: Bool { loadState == .loaded }
-    var isLocalOnly: Bool { localOnlyMode }
+    var isLocalOnly: Bool { localOnlyMode || offlineLocalStoreActive }
 
     var iCloudSyncDetail: String {
         if cloudKitEnabled {
             String(localized: "Private iCloud sync is on for your Apple Account. Family sharing uses a shared iCloud zone.")
         } else if localOnlyMode {
             PlatformCopy.localOnlyBuildDetail
+        } else if offlineLocalStoreActive {
+            PlatformCopy.signedOutLocalDetail
         } else {
             String(localized: "CloudKit is off. Data stays on this device until iCloud sync is available.")
         }
@@ -190,11 +194,13 @@ final class PersistenceController: ObservableObject {
         self.testStoreType = testStoreType
         self.includeSharedTestStore = includeSharedTestStore
         self.localOnlyMode = testStoreType == nil && !useInMemoryStore && !entitlementPresent
-        self.applicationSupportDirectoryOverride = applicationSupportDirectory
-        self.cloudKitEnabled = enableCloudKit
+        self.supportsCloudKit = enableCloudKit
             && testStoreType == nil
             && !useInMemoryStore
             && entitlementPresent
+        self.applicationSupportDirectoryOverride = applicationSupportDirectory
+        // CloudKit is turned on only after a verified account mounts scoped stores.
+        self.cloudKitEnabled = false
         container = NSPersistentCloudKitContainer(
             name: "HowMuch",
             managedObjectModel: Self.managedObjectModel
@@ -207,12 +213,10 @@ final class PersistenceController: ObservableObject {
                 loadState = .loaded
                 syncActivity = .idle
             }
-        } else if localOnlyMode {
-            mountLocalStore()
         } else {
-            // Production stores are mounted only after CloudKit confirms a
-            // stable account identity. No unscoped or fallback store is shown.
-            container.persistentStoreDescriptions = []
+            // Entitled builds stay usable without iCloud: local private data
+            // first, then a remount into the verified account when signed in.
+            mountOfflineLocalStore()
         }
     }
 
@@ -235,6 +239,14 @@ final class PersistenceController: ObservableObject {
         )
     }
 
+    static func makeCloudKitCapableTestStack(applicationSupportDirectory: URL) -> PersistenceController {
+        PersistenceController(
+            enableCloudKit: true,
+            cloudKitEntitlementPresent: true,
+            applicationSupportDirectory: applicationSupportDirectory
+        )
+    }
+
     static var preview: PersistenceController = {
         let controller = PersistenceController(inMemory: true, enableCloudKit: false)
         controller.loadSampleData()
@@ -247,24 +259,19 @@ final class PersistenceController: ObservableObject {
 
         switch identity {
         case .resolving:
-            lockData(
-                message: String(localized: "Verifying your iCloud account…", comment: "Persistence status")
-            )
-        case .signedOut:
-            lockData(
-                message: String(localized: "Sign in to iCloud to unlock your data.", comment: "Persistence status")
-            )
-        case .unavailable(let message):
-            lockData(message: message)
+            // Keep whatever store is already usable while CloudKit finishes
+            // checking. A cold start already mounted the offline local store.
+            if loadState != .loaded {
+                mountOfflineLocalStore()
+            }
+        case .signedOut, .unavailable:
+            mountOfflineLocalStore()
         case .available(let fingerprint):
-            guard cloudKitEnabled else {
-                currentAccountFingerprint = nil
-                lockData(
-                    message: String(localized: "This build is not configured for CloudKit.", comment: "Persistence status")
-                )
+            guard supportsCloudKit else {
+                mountOfflineLocalStore()
                 return
             }
-            if currentAccountFingerprint == fingerprint, loadState == .loaded {
+            if currentAccountFingerprint == fingerprint, loadState == .loaded, cloudKitEnabled {
                 return
             }
             await mountStores(for: fingerprint)
@@ -287,12 +294,25 @@ final class PersistenceController: ObservableObject {
     }
 
     func retryStoreLoad() async {
-        if localOnlyMode {
-            mountLocalStore()
+        if localOnlyMode || offlineLocalStoreActive {
+            offlineLocalStoreActive = false
+            mountOfflineLocalStore()
             await Task.yield()
         } else {
             await retryCloudKitLoad()
         }
+    }
+
+    private func mountOfflineLocalStore() {
+        if offlineLocalStoreActive, loadState == .loaded {
+            cloudKitEnabled = false
+            currentAccountFingerprint = nil
+            return
+        }
+        cloudKitEnabled = false
+        currentAccountFingerprint = nil
+        offlineLocalStoreActive = true
+        mountLocalStore()
     }
 
     private func mountLocalStore() {
@@ -331,6 +351,8 @@ final class PersistenceController: ObservableObject {
             failCoordinatorUnmount()
             return
         }
+        offlineLocalStoreActive = false
+        cloudKitEnabled = supportsCloudKit
         currentAccountFingerprint = fingerprint
         loadState = .loading
         loadError = nil
@@ -363,18 +385,6 @@ final class PersistenceController: ObservableObject {
         processPersistentHistory()
         retryPendingShareInvitation()
         await Task.yield()
-    }
-
-    private func lockData(message: String) {
-        guard invalidateMountedStores() else {
-            failCoordinatorUnmount()
-            return
-        }
-        currentAccountFingerprint = nil
-        loadState = .waitingForAccount
-        syncActivity = .unavailable
-        loadError = message
-        diagnostic = PersistenceDiagnostic(kind: .account, message: message)
     }
 
     func save() {

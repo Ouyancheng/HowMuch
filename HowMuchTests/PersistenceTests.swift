@@ -35,6 +35,75 @@ final class PersistenceTests: XCTestCase {
         XCTAssertGreaterThan(methods, 0)
     }
 
+    func testDeleteLedgerRemovesCascadedGraphAndKeepsOnePersonal() throws {
+        let persistence = Self.stack
+        let keep = persistence.createLedger(name: "Keep", kind: .personal, reportingCurrency: "HKD")
+        let remove = persistence.createLedger(name: "Remove", kind: .personal, reportingCurrency: "USD")
+        let household = persistence.createLedger(name: "Family", kind: .household, reportingCurrency: "HKD")
+        persistence.save()
+
+        let extraExpense = Expense(context: persistence.viewContext)
+        extraExpense.spendAmount = 5
+        extraExpense.chargedAmount = 5
+        extraExpense.reportingAmount = 5
+        extraExpense.spendCurrency = "USD"
+        extraExpense.chargedCurrency = "USD"
+        extraExpense.reportingCurrency = "USD"
+        extraExpense.ledger = remove
+        extraExpense.category = remove.activeCategories[0]
+        extraExpense.paymentMethod = remove.activePaymentMethods[0]
+        persistence.save()
+
+        XCTAssertTrue(persistence.canDeleteLedger(keep))
+        XCTAssertTrue(persistence.canDeleteLedger(remove))
+        XCTAssertTrue(persistence.canDeleteLedger(household))
+
+        let nextID = try persistence.deleteLedger(remove)
+        XCTAssertEqual(nextID, keep.uuid)
+        XCTAssertEqual(try persistence.viewContext.count(for: Expense.fetchRequest()), 0)
+        XCTAssertEqual(try persistence.viewContext.count(for: Ledger.fetchRequest()), 2)
+        XCTAssertFalse(persistence.canDeleteLedger(keep))
+
+        XCTAssertThrowsError(try persistence.deleteLedger(keep)) { error in
+            XCTAssertEqual(error as? LedgerDeletionError, .lastPersonalLedger)
+        }
+        XCTAssertEqual(keep.wrappedName, "Keep")
+
+        let leftover = try persistence.deleteLedger(household)
+        XCTAssertEqual(leftover, keep.uuid)
+        XCTAssertEqual(try persistence.viewContext.count(for: Ledger.fetchRequest()), 1)
+    }
+
+    func testSharedAndReadOnlyLedgersCannotBeDeleted() throws {
+        let persistence = Self.stack
+        persistence.createLedger(name: "Personal", kind: .personal, reportingCurrency: "HKD")
+        let family = persistence.createLedger(name: "Family", kind: .household, reportingCurrency: "HKD")
+        persistence.save()
+
+        persistence.ledgerAccessResolverForTesting = { _ in .sharedOwner }
+        persistence.invalidateLedgerAccess()
+        XCTAssertFalse(persistence.canDeleteLedger(family))
+        XCTAssertThrowsError(try persistence.deleteLedger(family)) { error in
+            XCTAssertEqual(error as? LedgerDeletionError, .stopSharingFirst)
+        }
+
+        persistence.ledgerAccessResolverForTesting = { _ in .readWriteParticipant }
+        persistence.invalidateLedgerAccess()
+        XCTAssertThrowsError(try persistence.deleteLedger(family)) { error in
+            XCTAssertEqual(error as? LedgerDeletionError, .leaveSharingFirst)
+        }
+
+        persistence.ledgerAccessResolverForTesting = { _ in .readOnlyParticipant }
+        persistence.invalidateLedgerAccess()
+        XCTAssertThrowsError(try persistence.deleteLedger(family)) { error in
+            XCTAssertEqual(error as? LedgerAccessError, .readOnly)
+        }
+
+        persistence.ledgerAccessResolverForTesting = nil
+        persistence.invalidateLedgerAccess()
+        XCTAssertTrue(persistence.canDeleteLedger(family))
+    }
+
     func testDualCurrencyExpenseSnapshot() throws {
         let persistence = Self.stack
         let ledger = persistence.createLedger(name: "Personal", kind: .personal, reportingCurrency: "HKD")
@@ -1050,6 +1119,41 @@ final class PersistenceTests: XCTestCase {
         let request = Ledger.fetchRequest()
         request.predicate = NSPredicate(format: "kind == %d", LedgerKind.personal.rawValue)
         XCTAssertEqual(try persistence.viewContext.count(for: request), 1)
+    }
+
+    func testCloudKitCapableBuildStaysUsableWithoutSignedInAccount() async throws {
+        let fileManager = FileManager.default
+        let base = fileManager.temporaryDirectory
+            .appendingPathComponent("HowMuchOfflineLocal-\(UUID().uuidString)", isDirectory: true)
+        defer { try? fileManager.removeItem(at: base) }
+
+        let persistence = PersistenceController.makeCloudKitCapableTestStack(
+            applicationSupportDirectory: base
+        )
+
+        XCTAssertTrue(persistence.isDataAvailable)
+        XCTAssertTrue(persistence.isLocalOnly)
+        XCTAssertFalse(persistence.cloudKitEnabled)
+        XCTAssertNil(persistence.sharedStore)
+        XCTAssertEqual(
+            persistence.privateStore?.url,
+            CloudStoreScope.localLocations(baseDirectory: base).privateStore
+        )
+        XCTAssertEqual(try persistence.viewContext.count(for: Ledger.fetchRequest()), 1)
+
+        await persistence.applyAccountIdentity(.resolving)
+        XCTAssertTrue(persistence.isDataAvailable)
+        XCTAssertFalse(persistence.cloudKitEnabled)
+
+        await persistence.applyAccountIdentity(.signedOut)
+        XCTAssertTrue(persistence.isDataAvailable)
+        XCTAssertTrue(persistence.isLocalOnly)
+        XCTAssertFalse(persistence.cloudKitEnabled)
+        XCTAssertEqual(try persistence.viewContext.count(for: Ledger.fetchRequest()), 1)
+
+        await persistence.applyAccountIdentity(.unavailable("restricted"))
+        XCTAssertTrue(persistence.isDataAvailable)
+        XCTAssertFalse(persistence.cloudKitEnabled)
     }
 
     func testLocalPrivateStoreIsCopiedIntoVerifiedAccountWithoutDeletingSources() throws {

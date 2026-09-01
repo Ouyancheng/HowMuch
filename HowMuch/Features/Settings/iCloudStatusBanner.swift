@@ -33,15 +33,16 @@ struct iCloudStatusBanner: View {
             banner(
                 symbol: "icloud.and.arrow.down",
                 title: String(localized: "Checking iCloud", comment: "Banner title"),
-                message: String(localized: "Your data stays locked until the iCloud account is verified.")
+                message: persistence.isDataAvailable
+                    ? String(localized: "You can keep using the app. Sync stays off until your iCloud account is verified.", comment: "Banner message")
+                    : String(localized: "Checking whether iCloud sync is available.", comment: "Banner message")
             )
         } else if !accountMonitor.isAvailable {
             banner(
                 symbol: "icloud.slash",
                 title: String(localized: "No iCloud Account", comment: "Banner title"),
                 message: persistence.loadError
-                    ?? PlatformCopy.signInToICloud,
-                offersRetry: true
+                    ?? PlatformCopy.signInToICloud
             )
         } else if !persistence.cloudKitEnabled {
             banner(

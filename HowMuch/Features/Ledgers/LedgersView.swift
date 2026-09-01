@@ -13,6 +13,7 @@ struct LedgersView: View {
         animation: .default
     )
     private var ledgers: FetchedResults<Ledger>
+    @State private var ledgerPendingDeletion: Ledger?
 
     var body: some View {
         List {
@@ -52,6 +53,23 @@ struct LedgersView: View {
                 .padding()
         }
         #endif
+        .confirmationDialog(
+            String(localized: "Delete this ledger?", comment: "Alert"),
+            isPresented: Binding(
+                get: { ledgerPendingDeletion != nil },
+                set: { if !$0 { ledgerPendingDeletion = nil } }
+            ),
+            titleVisibility: .visible
+        ) {
+            Button(String(localized: "Delete Ledger", comment: "Button"), role: .destructive) {
+                deletePendingLedger()
+            }
+            Button(String(localized: "Cancel", comment: "Button"), role: .cancel) {
+                ledgerPendingDeletion = nil
+            }
+        } message: {
+            Text(deleteConfirmationMessage(for: ledgerPendingDeletion))
+        }
         .toolbar {
             ToolbarItem(placement: .primaryAction) {
                 Menu {
@@ -96,9 +114,40 @@ struct LedgersView: View {
         .onTapGesture {
             appState.selectedLedgerID = ledger.wrappedID
         }
+        .swipeActions(edge: .trailing, allowsFullSwipe: false) {
+            if persistence.canDeleteLedger(ledger) {
+                Button(role: .destructive) {
+                    ledgerPendingDeletion = ledger
+                } label: {
+                    Label(String(localized: "Delete", comment: "Button"), systemImage: "trash")
+                }
+            }
+        }
         .accessibilityAddTraits(selected ? .isSelected : [])
         .accessibilityHint(String(localized: "Shows this ledger in Activity", comment: "Ledger selection"))
         .listRowBackground(selected ? Color.accentColor.opacity(0.12) : nil)
+    }
+
+    private func deleteConfirmationMessage(for ledger: Ledger?) -> String {
+        let expenseCount = ledger?.expenses?.count ?? 0
+        if expenseCount == 0 {
+            return String(localized: "This permanently deletes the ledger. No expenses are recorded yet.", comment: "Ledger deletion confirmation")
+        }
+        return String(
+            localized: "This permanently deletes \(expenseCount) expenses and the ledger. This cannot be undone.",
+            comment: "Ledger deletion confirmation"
+        )
+    }
+
+    private func deletePendingLedger() {
+        guard let ledger = ledgerPendingDeletion else { return }
+        do {
+            let nextID = try persistence.deleteLedger(ledger)
+            appState.selectedLedgerID = nextID
+        } catch {
+            return
+        }
+        ledgerPendingDeletion = nil
     }
 }
 
@@ -141,14 +190,20 @@ struct LedgerDetailView: View {
     var showsCloseButton = false
     @Environment(\.dismiss) private var dismiss
     @EnvironmentObject private var persistence: PersistenceController
+    @Environment(AppState.self) private var appState
     @State private var name: String = ""
     @State private var reportingCurrency: String = "USD"
     @State private var mutationError: String?
     @State private var presentsCurrencyConfirmation = false
+    @State private var presentsDeleteConfirmation = false
     @State private var dismissAfterCurrencyConfirmation = false
 
     private var isWritable: Bool {
         persistence.canWrite(ledger)
+    }
+
+    private var canDelete: Bool {
+        persistence.canDeleteLedger(ledger)
     }
 
     var body: some View {
@@ -203,6 +258,18 @@ struct LedgerDetailView: View {
                     Text(LedgerAccess.readOnlyExplanation)
                         .hmWrappingFooter()
                 }
+            }
+
+            Section {
+                Button(role: .destructive) {
+                    presentsDeleteConfirmation = true
+                } label: {
+                    Text(String(localized: "Delete Ledger", comment: "Button"))
+                }
+                .disabled(!canDelete)
+            } footer: {
+                Text(deleteFooter)
+                    .hmWrappingFooter()
             }
 
             if let mutationError {
@@ -267,6 +334,18 @@ struct LedgerDetailView: View {
             }
         }
         .confirmationDialog(
+            String(localized: "Delete this ledger?", comment: "Alert"),
+            isPresented: $presentsDeleteConfirmation,
+            titleVisibility: .visible
+        ) {
+            Button(String(localized: "Delete Ledger", comment: "Button"), role: .destructive) {
+                deleteLedger()
+            }
+            Button(String(localized: "Cancel", comment: "Button"), role: .cancel) {}
+        } message: {
+            Text(deleteConfirmationMessage)
+        }
+        .confirmationDialog(
             String(localized: "Change Reporting Currency?", comment: "Currency confirmation title"),
             isPresented: $presentsCurrencyConfirmation,
             titleVisibility: .visible
@@ -286,8 +365,40 @@ struct LedgerDetailView: View {
         }
     }
 
+    private var deleteFooter: String {
+        if let reason = persistence.ledgerDeletionBlockReason(ledger) {
+            return reason
+        }
+        return String(
+            localized: "Deletes this ledger and its expenses, categories, payment methods, and receipts. This cannot be undone.",
+            comment: "Ledger deletion explanation"
+        )
+    }
+
+    private var deleteConfirmationMessage: String {
+        let expenseCount = ledger.expenses?.count ?? 0
+        if expenseCount == 0 {
+            return String(localized: "This permanently deletes the ledger. No expenses are recorded yet.", comment: "Ledger deletion confirmation")
+        }
+        return String(
+            localized: "This permanently deletes \(expenseCount) expenses and the ledger. This cannot be undone.",
+            comment: "Ledger deletion confirmation"
+        )
+    }
+
+    private func deleteLedger() {
+        do {
+            let nextID = try persistence.deleteLedger(ledger)
+            appState.selectedLedgerID = nextID
+            mutationError = nil
+            dismiss()
+        } catch {
+            mutationError = error.localizedDescription
+        }
+    }
+
     private func persistName() {
-        guard isWritable else { return }
+        guard !ledger.isDeleted, isWritable else { return }
         let trimmed = name.trimmingCharacters(in: .whitespacesAndNewlines)
         guard !trimmed.isEmpty, trimmed != ledger.wrappedName else { return }
         do {

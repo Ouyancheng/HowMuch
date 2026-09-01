@@ -52,7 +52,9 @@ struct SplitRootView: View {
 struct LedgerSidebar: View {
     let ledgers: [Ledger]
     @Environment(AppState.self) private var appState
+    @EnvironmentObject private var persistence: PersistenceController
     @Environment(\.openWindow) private var openWindow
+    @State private var ledgerPendingDeletion: Ledger?
 
     private var personalLedgers: [Ledger] { ledgers.filter(\.isPersonal) }
     private var householdLedgers: [Ledger] { ledgers.filter(\.isHousehold) }
@@ -84,6 +86,28 @@ struct LedgerSidebar: View {
         .accessibilityIdentifier("sidebar.navigation")
         .hmMacListFillsColumn()
         .navigationTitle(String(localized: "Ledgers", comment: "Sidebar title"))
+        .confirmationDialog(
+            String(localized: "Delete this ledger?", comment: "Alert"),
+            isPresented: Binding(
+                get: { ledgerPendingDeletion != nil },
+                set: { if !$0 { ledgerPendingDeletion = nil } }
+            ),
+            titleVisibility: .visible
+        ) {
+            Button(String(localized: "Delete Ledger", comment: "Button"), role: .destructive) {
+                deletePendingLedger()
+            }
+            Button(String(localized: "Cancel", comment: "Button"), role: .cancel) {
+                ledgerPendingDeletion = nil
+            }
+        } message: {
+            let expenseCount = ledgerPendingDeletion?.expenses?.count ?? 0
+            Text(
+                expenseCount == 0
+                    ? String(localized: "This permanently deletes the ledger. No expenses are recorded yet.", comment: "Ledger deletion confirmation")
+                    : String(localized: "This permanently deletes \(expenseCount) expenses and the ledger. This cannot be undone.", comment: "Ledger deletion confirmation")
+            )
+        }
         #if os(iOS)
         .safeAreaInset(edge: .bottom) {
             HStack {
@@ -113,6 +137,35 @@ struct LedgerSidebar: View {
         .buttonStyle(.plain)
         .listRowBackground(selected ? Color.accentColor.opacity(0.15) : Color.clear)
         .accessibilityAddTraits(selected ? .isSelected : [])
+        .swipeActions(edge: .trailing, allowsFullSwipe: false) {
+            if persistence.canDeleteLedger(ledger) {
+                Button(role: .destructive) {
+                    ledgerPendingDeletion = ledger
+                } label: {
+                    Label(String(localized: "Delete", comment: "Button"), systemImage: "trash")
+                }
+            }
+        }
+        .contextMenu {
+            if persistence.canDeleteLedger(ledger) {
+                Button(role: .destructive) {
+                    ledgerPendingDeletion = ledger
+                } label: {
+                    Label(String(localized: "Delete Ledger", comment: "Button"), systemImage: "trash")
+                }
+            }
+        }
+    }
+
+    private func deletePendingLedger() {
+        guard let ledger = ledgerPendingDeletion else { return }
+        do {
+            let nextID = try persistence.deleteLedger(ledger)
+            appState.selectedLedgerID = nextID
+            ledgerPendingDeletion = nil
+        } catch {
+            ledgerPendingDeletion = nil
+        }
     }
 }
 
