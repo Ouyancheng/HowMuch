@@ -1,0 +1,56 @@
+<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
+<model type="com.apple.IDECoreDataModeler.DataModel" documentVersion="1.0" lastSavedToolsVersion="24400" systemVersion="25G83" minimumToolsVersion="Automatic" sourceLanguage="Swift" usedWithCloudKit="YES" userDefinedModelVersionIdentifier="">
+    <entity name="Category" representedClassName="Category" syncable="YES" codeGenerationType="none">
+        <attribute name="colorHex" optional="YES" attributeType="String" defaultValueString="5B8DEF"/>
+        <attribute name="createdAt" optional="YES" attributeType="Date" usesScalarValueType="NO"/>
+        <attribute name="uuid" optional="YES" attributeType="UUID" usesScalarValueType="NO"/>
+        <attribute name="isArchived" optional="YES" attributeType="Boolean" defaultValueString="NO" usesScalarValueType="YES"/>
+        <attribute name="name" optional="YES" attributeType="String" defaultValueString=""/>
+        <attribute name="sortOrder" optional="YES" attributeType="Integer 16" defaultValueString="0" usesScalarValueType="YES"/>
+        <attribute name="symbolName" optional="YES" attributeType="String" defaultValueString="tag"/>
+        <relationship name="expenses" optional="YES" toMany="YES" deletionRule="Nullify" destinationEntity="Expense" inverseName="category" inverseEntity="Expense"/>
+        <relationship name="ledger" optional="YES" maxCount="1" deletionRule="Nullify" destinationEntity="Ledger" inverseName="categories" inverseEntity="Ledger"/>
+    </entity>
+    <entity name="Expense" representedClassName="Expense" syncable="YES" codeGenerationType="none">
+        <attribute name="chargedAmount" optional="YES" attributeType="Decimal" defaultValueString="0"/>
+        <attribute name="chargedCurrency" optional="YES" attributeType="String" defaultValueString="USD"/>
+        <attribute name="createdAt" optional="YES" attributeType="Date" usesScalarValueType="NO"/>
+        <attribute name="createdByName" optional="YES" attributeType="String" defaultValueString=""/>
+        <attribute name="uuid" optional="YES" attributeType="UUID" usesScalarValueType="NO"/>
+        <attribute name="merchant" optional="YES" attributeType="String" defaultValueString=""/>
+        <attribute name="note" optional="YES" attributeType="String" defaultValueString=""/>
+        <attribute name="occurredAt" optional="YES" attributeType="Date" usesScalarValueType="NO"/>
+        <attribute name="reportingAmount" optional="YES" attributeType="Decimal" defaultValueString="0"/>
+        <attribute name="reportingCurrency" optional="YES" attributeType="String" defaultValueString="USD"/>
+        <attribute name="spendAmount" optional="YES" attributeType="Decimal" defaultValueString="0"/>
+        <attribute name="spendCurrency" optional="YES" attributeType="String" defaultValueString="USD"/>
+        <attribute name="receiptContentType" optional="YES" attributeType="String"/>
+        <attribute name="receiptData" optional="YES" attributeType="Binary" allowsExternalBinaryDataStorage="YES"/>
+        <attribute name="receiptFileName" optional="YES" attributeType="String"/>
+        <attribute name="updatedAt" optional="YES" attributeType="Date" usesScalarValueType="NO"/>
+        <relationship name="category" optional="YES" maxCount="1" deletionRule="Nullify" destinationEntity="Category" inverseName="expenses" inverseEntity="Category"/>
+        <relationship name="ledger" optional="YES" maxCount="1" deletionRule="Nullify" destinationEntity="Ledger" inverseName="expenses" inverseEntity="Ledger"/>
+        <relationship name="paymentMethod" optional="YES" maxCount="1" deletionRule="Nullify" destinationEntity="PaymentMethod" inverseName="expenses" inverseEntity="PaymentMethod"/>
+    </entity>
+    <entity name="Ledger" representedClassName="Ledger" syncable="YES" codeGenerationType="none">
+        <attribute name="createdAt" optional="YES" attributeType="Date" usesScalarValueType="NO"/>
+        <attribute name="uuid" optional="YES" attributeType="UUID" usesScalarValueType="NO"/>
+        <attribute name="kind" optional="YES" attributeType="Integer 16" defaultValueString="0" usesScalarValueType="YES"/>
+        <attribute name="name" optional="YES" attributeType="String" defaultValueString=""/>
+        <attribute name="reportingCurrency" optional="YES" attributeType="String" defaultValueString="USD"/>
+        <attribute name="updatedAt" optional="YES" attributeType="Date" usesScalarValueType="NO"/>
+        <relationship name="categories" optional="YES" toMany="YES" deletionRule="Cascade" destinationEntity="Category" inverseName="ledger" inverseEntity="Category"/>
+        <relationship name="expenses" optional="YES" toMany="YES" deletionRule="Cascade" destinationEntity="Expense" inverseName="ledger" inverseEntity="Expense"/>
+        <relationship name="paymentMethods" optional="YES" toMany="YES" deletionRule="Cascade" destinationEntity="PaymentMethod" inverseName="ledger" inverseEntity="PaymentMethod"/>
+    </entity>
+    <entity name="PaymentMethod" representedClassName="PaymentMethod" syncable="YES" codeGenerationType="none">
+        <attribute name="billingCurrency" optional="YES" attributeType="String" defaultValueString="USD"/>
+        <attribute name="createdAt" optional="YES" attributeType="Date" usesScalarValueType="NO"/>
+        <attribute name="uuid" optional="YES" attributeType="UUID" usesScalarValueType="NO"/>
+        <attribute name="isArchived" optional="YES" attributeType="Boolean" defaultValueString="NO" usesScalarValueType="YES"/>
+        <attribute name="kind" optional="YES" attributeType="Integer 16" defaultValueString="0" usesScalarValueType="YES"/>
+        <attribute name="name" optional="YES" attributeType="String" defaultValueString=""/>
+        <relationship name="expenses" optional="YES" toMany="YES" deletionRule="Nullify" destinationEntity="Expense" inverseName="paymentMethod" inverseEntity="Expense"/>
+        <relationship name="ledger" optional="YES" maxCount="1" deletionRule="Nullify" destinationEntity="Ledger" inverseName="paymentMethods" inverseEntity="Ledger"/>
+    </entity>
+</model>

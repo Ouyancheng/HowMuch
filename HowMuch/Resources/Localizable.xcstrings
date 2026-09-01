@@ -1,0 +1,2496 @@
+{
+  "sourceLanguage" : "en",
+  "strings" : {
+    "·" : {
+
+    },
+    "%@ · %@" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "new",
+            "value" : "%1$@ · %2$@"
+          }
+        }
+      }
+    },
+    "≈ %@" : {
+
+    },
+    "About" : {
+      "comment" : "Section",
+      "localizations" : {
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "关于"
+          }
+        },
+        "zh-HK" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "關於"
+          }
+        }
+      }
+    },
+    "Account" : {
+      "comment" : "Field",
+      "localizations" : {
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "账户"
+          }
+        },
+        "zh-HK" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "賬戶"
+          }
+        }
+      }
+    },
+    "Activity" : {
+      "comment" : "Screen title",
+      "localizations" : {
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "活动"
+          }
+        },
+        "zh-HK" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "活動"
+          }
+        }
+      }
+    },
+    "Add Category" : {
+      "comment" : "Screen title\nToolbar",
+      "localizations" : {
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "添加类别"
+          }
+        },
+        "zh-HK" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "新增類別"
+          }
+        }
+      }
+    },
+    "Add expenses to see totals by category and currency." : {
+      "localizations" : {
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "添加开支后即可查看按类别与货币的合计。"
+          }
+        },
+        "zh-HK" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "新增開支後即可查看按類別與貨幣的合計。"
+          }
+        }
+      }
+    },
+    "Add Payment Method" : {
+      "comment" : "Screen title\nToolbar",
+      "localizations" : {
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "添加付款方式"
+          }
+        },
+        "zh-HK" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "新增付款方式"
+          }
+        }
+      }
+    },
+    "Add PDF or File" : {
+      "comment" : "Button"
+    },
+    "Add Photo" : {
+      "comment" : "Button"
+    },
+    "Add Photo or PDF" : {
+      "comment" : "Button"
+    },
+    "Add your first spend to get started." : {
+      "localizations" : {
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "添加第一笔开支即可开始。"
+          }
+        },
+        "zh-HK" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "新增第一筆開支即可開始。"
+          }
+        }
+      }
+    },
+    "Alipay" : {
+      "comment" : "Payment method kind",
+      "localizations" : {
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "支付宝"
+          }
+        },
+        "zh-HK" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "支付寶"
+          }
+        }
+      }
+    },
+    "All currencies, in %@. Default rates when an expense was not entered in this currency." : {
+
+    },
+    "All Time" : {
+      "comment" : "Insights range",
+      "localizations" : {
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "全部"
+          }
+        },
+        "zh-HK" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "全部"
+          }
+        }
+      }
+    },
+    "Amount" : {
+      "comment" : "Field",
+      "localizations" : {
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "金额"
+          }
+        },
+        "zh-HK" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "金額"
+          }
+        }
+      }
+    },
+    "Amount must be greater than zero" : {
+      "comment" : "Validation",
+      "localizations" : {
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "金额必须大于零"
+          }
+        },
+        "zh-HK" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "金額必須大於零"
+          }
+        }
+      }
+    },
+    "Archive" : {
+      "extractionState" : "stale",
+      "localizations" : {
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "封存"
+          }
+        },
+        "zh-HK" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "封存"
+          }
+        }
+      }
+    },
+    "Bank Transfer" : {
+      "comment" : "Payment method kind",
+      "localizations" : {
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "银行转账"
+          }
+        },
+        "zh-HK" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "銀行轉賬"
+          }
+        }
+      }
+    },
+    "Billed in a different currency" : {
+      "comment" : "Toggle"
+    },
+    "Billing Currency" : {
+      "comment" : "Field",
+      "localizations" : {
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "结算货币"
+          }
+        },
+        "zh-HK" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "結算貨幣"
+          }
+        }
+      }
+    },
+    "By Category" : {
+      "comment" : "Insights section",
+      "localizations" : {
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "按类别"
+          }
+        },
+        "zh-HK" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "按類別"
+          }
+        }
+      }
+    },
+    "By Charged Currency" : {
+      "comment" : "Insights section",
+      "localizations" : {
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "按入账货币"
+          }
+        },
+        "zh-HK" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "按入賬貨幣"
+          }
+        }
+      }
+    },
+    "By Spend Currency" : {
+      "comment" : "Insights section",
+      "localizations" : {
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "按消费货币"
+          }
+        },
+        "zh-HK" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "按消費貨幣"
+          }
+        }
+      }
+    },
+    "Can't Remove Category" : {
+      "comment" : "Alert"
+    },
+    "Can't Remove Payment Method" : {
+      "comment" : "Alert"
+    },
+    "Cancel" : {
+      "comment" : "Button",
+      "localizations" : {
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "取消"
+          }
+        },
+        "zh-HK" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "取消"
+          }
+        }
+      }
+    },
+    "Cash" : {
+      "comment" : "Default payment method\nPayment method kind",
+      "localizations" : {
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "现金"
+          }
+        },
+        "zh-HK" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "現金"
+          }
+        }
+      }
+    },
+    "Cash can't be removed." : {
+      "comment" : "Validation"
+    },
+    "Categories" : {
+      "comment" : "Link\nScreen title",
+      "localizations" : {
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "类别"
+          }
+        },
+        "zh-HK" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "類別"
+          }
+        }
+      }
+    },
+    "Category" : {
+      "comment" : "Chart axis\nField\nScreen title",
+      "localizations" : {
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "类别"
+          }
+        },
+        "zh-HK" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "類別"
+          }
+        }
+      }
+    },
+    "Charged" : {
+      "comment" : "Field",
+      "localizations" : {
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "入账"
+          }
+        },
+        "zh-HK" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "入賬"
+          }
+        }
+      }
+    },
+    "Charged %@" : {
+      "comment" : "VoiceOver charged amount"
+    },
+    "Charged Currency" : {
+      "comment" : "Field",
+      "extractionState" : "stale",
+      "localizations" : {
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "入账货币"
+          }
+        },
+        "zh-HK" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "入賬貨幣"
+          }
+        }
+      }
+    },
+    "Checking…" : {
+      "comment" : "iCloud account status",
+      "localizations" : {
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "正在检查…"
+          }
+        },
+        "zh-HK" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "正在檢查…"
+          }
+        }
+      }
+    },
+    "Choose a photo or PDF receipt." : {
+      "comment" : "Open panel"
+    },
+    "Close" : {
+      "extractionState" : "stale",
+      "localizations" : {
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "关闭"
+          }
+        },
+        "zh-HK" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "關閉"
+          }
+        }
+      }
+    },
+    "CloudKit is off, so the schema cannot be initialized." : {
+      "comment" : "Debug",
+      "extractionState" : "stale",
+      "localizations" : {
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "CloudKit 已关闭，无法初始化架构。"
+          }
+        },
+        "zh-HK" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "CloudKit 已關閉，無法初始化架構。"
+          }
+        }
+      }
+    },
+    "CloudKit is off. Data stays on this device until iCloud sync is available." : {
+      "localizations" : {
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "CloudKit 已关闭。数据会留在此设备，直至 iCloud 同步可用。"
+          }
+        },
+        "zh-HK" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "CloudKit 已關閉。資料會留在此裝置，直至 iCloud 同步可用。"
+          }
+        }
+      }
+    },
+    "CloudKit schema initialized." : {
+      "extractionState" : "stale",
+      "localizations" : {
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "已初始化 CloudKit 架构。"
+          }
+        },
+        "zh-HK" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "已初始化 CloudKit 架構。"
+          }
+        }
+      }
+    },
+    "CloudKit Sync" : {
+      "comment" : "Field",
+      "extractionState" : "stale",
+      "localizations" : {
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "CloudKit 同步"
+          }
+        },
+        "zh-HK" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "CloudKit 同步"
+          }
+        }
+      }
+    },
+    "Color" : {
+      "comment" : "Field",
+      "localizations" : {
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "颜色"
+          }
+        },
+        "zh-HK" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "顏色"
+          }
+        }
+      }
+    },
+    "Consumption" : {
+      "comment" : "Insights subtitle",
+      "extractionState" : "stale",
+      "localizations" : {
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "消费"
+          }
+        },
+        "zh-HK" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "消費"
+          }
+        }
+      }
+    },
+    "Create Family Ledger" : {
+      "comment" : "Button",
+      "localizations" : {
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "创建家庭账本"
+          }
+        },
+        "zh-HK" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "建立家庭賬本"
+          }
+        }
+      }
+    },
+    "Create Personal Ledger" : {
+      "comment" : "Button",
+      "localizations" : {
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "创建个人账本"
+          }
+        },
+        "zh-HK" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "建立個人賬本"
+          }
+        }
+      }
+    },
+    "Credit Card" : {
+      "comment" : "Payment method kind",
+      "localizations" : {
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "信用卡"
+          }
+        },
+        "zh-HK" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "信用卡"
+          }
+        }
+      }
+    },
+    "Currency" : {
+      "comment" : "Field",
+      "localizations" : {
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "货币"
+          }
+        },
+        "zh-HK" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "貨幣"
+          }
+        }
+      }
+    },
+    "Date" : {
+      "comment" : "Field",
+      "localizations" : {
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "日期"
+          }
+        },
+        "zh-HK" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "日期"
+          }
+        }
+      }
+    },
+    "Debit Card" : {
+      "comment" : "Payment method kind",
+      "localizations" : {
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "借记卡"
+          }
+        },
+        "zh-HK" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "扣賬卡"
+          }
+        }
+      }
+    },
+    "Delete" : {
+      "comment" : "Button",
+      "localizations" : {
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "删除"
+          }
+        },
+        "zh-HK" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "刪除"
+          }
+        }
+      }
+    },
+    "Delete Expense" : {
+      "comment" : "Button"
+    },
+    "Delete this expense?" : {
+      "comment" : "Alert"
+    },
+    "Details" : {
+      "comment" : "Form section",
+      "localizations" : {
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "详细信息"
+          }
+        },
+        "zh-HK" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "詳細資料"
+          }
+        }
+      }
+    },
+    "Developer" : {
+      "comment" : "Settings tab",
+      "extractionState" : "stale",
+      "localizations" : {
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "开发者"
+          }
+        },
+        "zh-HK" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "開發者"
+          }
+        }
+      }
+    },
+    "Dining" : {
+      "comment" : "Default category",
+      "localizations" : {
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "外出用餐"
+          }
+        },
+        "zh-HK" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "外出用餐"
+          }
+        }
+      }
+    },
+    "Done" : {
+      "comment" : "Button",
+      "localizations" : {
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "完成"
+          }
+        },
+        "zh-HK" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "完成"
+          }
+        }
+      }
+    },
+    "Edit Expense" : {
+      "comment" : "Screen title",
+      "localizations" : {
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "编辑开支"
+          }
+        },
+        "zh-HK" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "編輯開支"
+          }
+        }
+      }
+    },
+    "Education" : {
+      "comment" : "Default category",
+      "localizations" : {
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "教育"
+          }
+        },
+        "zh-HK" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "教育"
+          }
+        }
+      }
+    },
+    "Enter the amount in the ledger reporting currency." : {
+      "comment" : "Validation",
+      "localizations" : {
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "请输入账本汇报货币的金额。"
+          }
+        },
+        "zh-HK" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "請輸入賬本彙報貨幣的金額。"
+          }
+        }
+      }
+    },
+    "Enter what the card or wallet actually billed." : {
+
+    },
+    "Entertainment" : {
+      "comment" : "Default category",
+      "localizations" : {
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "娱乐"
+          }
+        },
+        "zh-HK" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "娛樂"
+          }
+        }
+      }
+    },
+    "Expense" : {
+      "comment" : "Fallback expense title",
+      "localizations" : {
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "开支"
+          }
+        },
+        "zh-HK" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "開支"
+          }
+        }
+      }
+    },
+    "Family" : {
+      "comment" : "Ledger kind\nSection\nSidebar section",
+      "localizations" : {
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "家庭"
+          }
+        },
+        "zh-HK" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "家庭"
+          }
+        }
+      }
+    },
+    "Family ledgers are shared with people you invite. Personal ledgers stay private." : {
+      "localizations" : {
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "家庭账本会与你邀请的人共享。个人账本保持私密。"
+          }
+        },
+        "zh-HK" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "家庭賬本會與你邀請的人共享。個人賬本保持私密。"
+          }
+        }
+      }
+    },
+    "Family Sharing" : {
+      "comment" : "Link\nScreen title",
+      "localizations" : {
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "家庭共享"
+          }
+        },
+        "zh-HK" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "家庭共享"
+          }
+        }
+      }
+    },
+    "Food" : {
+      "comment" : "Default category",
+      "localizations" : {
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "饮食"
+          }
+        },
+        "zh-HK" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "飲食"
+          }
+        }
+      }
+    },
+    "General" : {
+      "comment" : "Settings tab",
+      "localizations" : {
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "通用"
+          }
+        },
+        "zh-HK" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "一般"
+          }
+        }
+      }
+    },
+    "Gifts" : {
+      "comment" : "Default category",
+      "localizations" : {
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "礼物"
+          }
+        },
+        "zh-HK" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "禮物"
+          }
+        }
+      }
+    },
+    "Groceries" : {
+      "comment" : "Default category",
+      "localizations" : {
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "日用"
+          }
+        },
+        "zh-HK" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "日用"
+          }
+        }
+      }
+    },
+    "Health" : {
+      "comment" : "Default category",
+      "localizations" : {
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "健康"
+          }
+        },
+        "zh-HK" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "健康"
+          }
+        }
+      }
+    },
+    "Housing" : {
+      "comment" : "Default category",
+      "localizations" : {
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "住房"
+          }
+        },
+        "zh-HK" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "住屋"
+          }
+        }
+      }
+    },
+    "HowMuch" : {
+
+    },
+    "iCloud" : {
+      "comment" : "Field",
+      "localizations" : {
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "iCloud"
+          }
+        },
+        "zh-HK" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "iCloud"
+          }
+        }
+      }
+    },
+    "iCloud is not available. Sign in to iCloud to share a family ledger." : {
+      "comment" : "Share error",
+      "localizations" : {
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "无法使用 iCloud。请登录 iCloud 以共享家庭账本。"
+          }
+        },
+        "zh-HK" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "無法使用 iCloud。請登入 iCloud 以共享家庭賬本。"
+          }
+        }
+      }
+    },
+    "iCloud is required to share a family ledger." : {
+      "extractionState" : "stale",
+      "localizations" : {
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "共享家庭账本需要 iCloud。"
+          }
+        },
+        "zh-HK" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "共享家庭賬本需要 iCloud。"
+          }
+        }
+      }
+    },
+    "iCloud Sync" : {
+      "comment" : "Field",
+      "localizations" : {
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "iCloud 同步"
+          }
+        },
+        "zh-HK" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "iCloud 同步"
+          }
+        }
+      }
+    },
+    "iCloud Sync Off" : {
+      "comment" : "Banner title",
+      "localizations" : {
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "iCloud 同步已关闭"
+          }
+        },
+        "zh-HK" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "iCloud 同步已關閉"
+          }
+        }
+      }
+    },
+    "Icon" : {
+      "comment" : "Field",
+      "localizations" : {
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "图标"
+          }
+        },
+        "zh-HK" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "圖示"
+          }
+        }
+      }
+    },
+    "Implied Rate" : {
+      "comment" : "Field",
+      "localizations" : {
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "隐含汇率"
+          }
+        },
+        "zh-HK" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "隱含匯率"
+          }
+        }
+      }
+    },
+    "Insights" : {
+      "comment" : "Screen title",
+      "localizations" : {
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "洞察"
+          }
+        },
+        "zh-HK" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "洞察"
+          }
+        }
+      }
+    },
+    "Invite people with Apple ID via Messages or Mail after you create the ledger." : {
+      "localizations" : {
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "创建账本后，通过信息或邮件邀请使用 Apple ID 的家人。"
+          }
+        },
+        "zh-HK" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "建立賬本後，透過訊息或郵件邀請使用 Apple ID 的家人。"
+          }
+        }
+      }
+    },
+    "Invite people with Apple ID via Messages or Mail." : {
+      "extractionState" : "stale",
+      "localizations" : {
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "通过信息或邮件邀请使用 Apple ID 的家人。"
+          }
+        },
+        "zh-HK" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "透過訊息或郵件邀請使用 Apple ID 的家人。"
+          }
+        }
+      }
+    },
+    "Invite people with Apple ID via Messages or Mail. Everyone sees and edits the same family expenses." : {
+      "extractionState" : "stale",
+      "localizations" : {
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "通过信息或邮件邀请使用 Apple ID 的家人。所有人都能查看并编辑同一笔家庭开支。"
+          }
+        },
+        "zh-HK" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "透過訊息或郵件邀請使用 Apple ID 的家人。所有人都能查看並編輯同一筆家庭開支。"
+          }
+        }
+      }
+    },
+    "Invite someone with their Apple ID using Messages or Mail. They get the same family expenses, not a bill split." : {
+
+    },
+    "Keep at least one category." : {
+      "comment" : "Validation"
+    },
+    "Keep at least one payment method." : {
+      "comment" : "Validation"
+    },
+    "Kind" : {
+      "comment" : "Field",
+      "localizations" : {
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "类型"
+          }
+        },
+        "zh-HK" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "類型"
+          }
+        }
+      }
+    },
+    "Last 30 Days" : {
+      "comment" : "Insights range",
+      "localizations" : {
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "过去 30 天"
+          }
+        },
+        "zh-HK" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "過去 30 日"
+          }
+        }
+      }
+    },
+    "Leave Family" : {
+      "comment" : "Button",
+      "localizations" : {
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "离开家庭"
+          }
+        },
+        "zh-HK" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "離開家庭"
+          }
+        }
+      }
+    },
+    "Ledger" : {
+      "comment" : "Field",
+      "localizations" : {
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "账本"
+          }
+        },
+        "zh-HK" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "賬本"
+          }
+        }
+      }
+    },
+    "Ledger Settings" : {
+      "comment" : "Toolbar"
+    },
+    "Ledger total" : {
+      "comment" : "Field"
+    },
+    "Ledgers" : {
+      "comment" : "Screen title\nSidebar title",
+      "localizations" : {
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "账本"
+          }
+        },
+        "zh-HK" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "賬本"
+          }
+        }
+      }
+    },
+    "Manage Sharing" : {
+      "comment" : "Button",
+      "localizations" : {
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "管理共享"
+          }
+        },
+        "zh-HK" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "管理共享"
+          }
+        }
+      }
+    },
+    "Member" : {
+      "comment" : "Share participant role",
+      "localizations" : {
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "成员"
+          }
+        },
+        "zh-HK" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "成員"
+          }
+        }
+      }
+    },
+    "Menu item" : {
+      "extractionState" : "stale",
+      "localizations" : {
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "菜单项"
+          }
+        },
+        "zh-HK" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "選單項目"
+          }
+        }
+      }
+    },
+    "Merchant" : {
+      "comment" : "Field",
+      "localizations" : {
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "商户"
+          }
+        },
+        "zh-HK" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "商戶"
+          }
+        }
+      }
+    },
+    "Merchant or note" : {
+      "comment" : "Search prompt",
+      "localizations" : {
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "商户或备注"
+          }
+        },
+        "zh-HK" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "商戶或備註"
+          }
+        }
+      }
+    },
+    "Name" : {
+      "comment" : "Field",
+      "localizations" : {
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "名称"
+          }
+        },
+        "zh-HK" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "名稱"
+          }
+        }
+      }
+    },
+    "Name is required" : {
+      "comment" : "Validation",
+      "localizations" : {
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "必须填写名称"
+          }
+        },
+        "zh-HK" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "必須填寫名稱"
+          }
+        }
+      }
+    },
+    "New Expense" : {
+      "comment" : "Screen title\nToolbar",
+      "localizations" : {
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "新增开支"
+          }
+        },
+        "zh-HK" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "新增開支"
+          }
+        }
+      }
+    },
+    "New Family Ledger" : {
+      "comment" : "List action\nScreen title\nSidebar action\nToolbar",
+      "localizations" : {
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "新建家庭账本"
+          }
+        },
+        "zh-HK" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "新增家庭賬本"
+          }
+        }
+      }
+    },
+    "New Ledger" : {
+      "comment" : "Toolbar",
+      "localizations" : {
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "新建账本"
+          }
+        },
+        "zh-HK" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "新增賬本"
+          }
+        }
+      }
+    },
+    "New Personal Ledger" : {
+      "comment" : "List action\nScreen title\nSettings action\nSidebar action\nToolbar",
+      "localizations" : {
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "新建个人账本"
+          }
+        },
+        "zh-HK" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "新增個人賬本"
+          }
+        }
+      }
+    },
+    "No Expenses" : {
+      "comment" : "Empty title",
+      "localizations" : {
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "没有开支"
+          }
+        },
+        "zh-HK" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "沒有開支"
+          }
+        }
+      }
+    },
+    "No iCloud Account" : {
+      "comment" : "Banner title",
+      "localizations" : {
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "未登录 iCloud"
+          }
+        },
+        "zh-HK" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "未登入 iCloud"
+          }
+        }
+      }
+    },
+    "No one else is on this ledger yet." : {
+
+    },
+    "No participants yet. Share this ledger to invite family members." : {
+      "extractionState" : "stale",
+      "localizations" : {
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "尚未有成员。共享此账本以邀请家人。"
+          }
+        },
+        "zh-HK" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "尚未有成員。共享此賬本以邀請家人。"
+          }
+        }
+      }
+    },
+    "None" : {
+      "comment" : "Share permission",
+      "localizations" : {
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "无"
+          }
+        },
+        "zh-HK" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "無"
+          }
+        }
+      }
+    },
+    "Not Signed In" : {
+      "comment" : "iCloud account status",
+      "localizations" : {
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "未登录"
+          }
+        },
+        "zh-HK" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "未登入"
+          }
+        }
+      }
+    },
+    "Note" : {
+      "comment" : "Field",
+      "localizations" : {
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "备注"
+          }
+        },
+        "zh-HK" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "備註"
+          }
+        }
+      }
+    },
+    "Off" : {
+      "comment" : "Toggle off",
+      "localizations" : {
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "关"
+          }
+        },
+        "zh-HK" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "關閉"
+          }
+        }
+      }
+    },
+    "OK" : {
+      "comment" : "Button"
+    },
+    "On" : {
+      "comment" : "Toggle on",
+      "localizations" : {
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "开"
+          }
+        },
+        "zh-HK" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "開啟"
+          }
+        }
+      }
+    },
+    "Optional. Photos and PDFs, up to 10 MB." : {
+
+    },
+    "Other" : {
+      "comment" : "Default category\nPayment method kind",
+      "localizations" : {
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "其他"
+          }
+        },
+        "zh-HK" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "其他"
+          }
+        }
+      }
+    },
+    "Outflow" : {
+      "comment" : "Insights subtitle",
+      "extractionState" : "stale",
+      "localizations" : {
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "流出"
+          }
+        },
+        "zh-HK" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "流出"
+          }
+        }
+      }
+    },
+    "Owner" : {
+      "comment" : "Share participant role",
+      "localizations" : {
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "所有者"
+          }
+        },
+        "zh-HK" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "擁有人"
+          }
+        }
+      }
+    },
+    "Paid with" : {
+      "comment" : "Field"
+    },
+    "Participants" : {
+      "comment" : "Section",
+      "localizations" : {
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "成员"
+          }
+        },
+        "zh-HK" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "成員"
+          }
+        }
+      }
+    },
+    "Past expenses keep this category. A category with no expenses is deleted." : {
+
+    },
+    "Past expenses keep this method. A method with no expenses is deleted." : {
+      "comment" : "Hint"
+    },
+    "Payment Method" : {
+      "comment" : "Screen title",
+      "localizations" : {
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "付款方式"
+          }
+        },
+        "zh-HK" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "付款方式"
+          }
+        }
+      }
+    },
+    "Payment Methods" : {
+      "comment" : "Link\nScreen title",
+      "localizations" : {
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "付款方式"
+          }
+        },
+        "zh-HK" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "付款方式"
+          }
+        }
+      }
+    },
+    "PDF" : {
+      "comment" : "Receipt kind"
+    },
+    "Personal" : {
+      "comment" : "Default personal ledger name\nLedger kind\nSection\nSidebar section",
+      "localizations" : {
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "个人"
+          }
+        },
+        "zh-HK" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "個人"
+          }
+        }
+      }
+    },
+    "Personal Ledger" : {
+      "comment" : "Section",
+      "extractionState" : "stale",
+      "localizations" : {
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "个人账本"
+          }
+        },
+        "zh-HK" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "個人賬本"
+          }
+        }
+      }
+    },
+    "Personal Ledgers" : {
+      "comment" : "Section",
+      "localizations" : {
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "个人账本"
+          }
+        },
+        "zh-HK" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "個人賬本"
+          }
+        }
+      }
+    },
+    "Personal ledgers stay private and sync across your own devices with iCloud." : {
+      "localizations" : {
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "个人账本保持私密，并通过 iCloud 在你自己的设备之间同步。"
+          }
+        },
+        "zh-HK" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "個人賬本保持私密，並透過 iCloud 在你自己的裝置之間同步。"
+          }
+        }
+      }
+    },
+    "Personal ledgers stay private. Create a family ledger to share." : {
+      "comment" : "Share error",
+      "localizations" : {
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "个人账本保持私密。请创建家庭账本才能共享。"
+          }
+        },
+        "zh-HK" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "個人賬本保持私密。請建立家庭賬本才能共享。"
+          }
+        }
+      }
+    },
+    "Photo" : {
+      "comment" : "Receipt kind"
+    },
+    "Private iCloud sync is on for your Apple ID. Family sharing uses a shared iCloud zone." : {
+      "localizations" : {
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "已为你的 Apple ID 开启私人 iCloud 同步。家庭共享使用共享的 iCloud 区域。"
+          }
+        },
+        "zh-HK" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "已為你的 Apple ID 開啟私人 iCloud 同步。家庭共享使用共享的 iCloud 區域。"
+          }
+        }
+      }
+    },
+    "Range" : {
+      "comment" : "Insights",
+      "localizations" : {
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "范围"
+          }
+        },
+        "zh-HK" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "範圍"
+          }
+        }
+      }
+    },
+    "Read Only" : {
+      "comment" : "Share permission",
+      "localizations" : {
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "只读"
+          }
+        },
+        "zh-HK" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "唯讀"
+          }
+        }
+      }
+    },
+    "Read-Write" : {
+      "comment" : "Share permission",
+      "localizations" : {
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "可读写"
+          }
+        },
+        "zh-HK" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "可讀寫"
+          }
+        }
+      }
+    },
+    "Receipt" : {
+      "comment" : "Default receipt filename"
+    },
+    "Receipt attached" : {
+      "comment" : "VoiceOver"
+    },
+    "Receipts can be up to 10 MB." : {
+      "comment" : "Receipt error"
+    },
+    "Remove" : {
+      "comment" : "Button"
+    },
+    "Remove Category" : {
+      "comment" : "Button"
+    },
+    "Remove Payment Method" : {
+      "comment" : "Button"
+    },
+    "Remove Receipt" : {
+      "comment" : "Button"
+    },
+    "Replace Photo" : {
+      "comment" : "Button"
+    },
+    "Replace Receipt" : {
+      "comment" : "Button"
+    },
+    "Replace with File" : {
+      "comment" : "Button"
+    },
+    "Reporting Currency" : {
+      "comment" : "Field",
+      "localizations" : {
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "汇报货币"
+          }
+        },
+        "zh-HK" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "彙報貨幣"
+          }
+        }
+      }
+    },
+    "Restricted" : {
+      "comment" : "iCloud account status",
+      "localizations" : {
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "受限制"
+          }
+        },
+        "zh-HK" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "受限制"
+          }
+        }
+      }
+    },
+    "Save" : {
+      "comment" : "Button",
+      "localizations" : {
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "保存"
+          }
+        },
+        "zh-HK" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "儲存"
+          }
+        }
+      }
+    },
+    "Schema initialization needs a CloudKit-signed build." : {
+      "extractionState" : "stale",
+      "localizations" : {
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "初始化架构需要已签署 CloudKit 的构建。"
+          }
+        },
+        "zh-HK" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "初始化架構需要已簽署 CloudKit 的建置。"
+          }
+        }
+      }
+    },
+    "Select a category" : {
+      "comment" : "Validation",
+      "localizations" : {
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "请选择类别"
+          }
+        },
+        "zh-HK" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "請選擇類別"
+          }
+        }
+      }
+    },
+    "Select a ledger" : {
+      "comment" : "Validation",
+      "localizations" : {
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "请选择账本"
+          }
+        },
+        "zh-HK" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "請選擇賬本"
+          }
+        }
+      }
+    },
+    "Select a payment method" : {
+      "comment" : "Validation",
+      "localizations" : {
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "请选择付款方式"
+          }
+        },
+        "zh-HK" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "請選擇付款方式"
+          }
+        }
+      }
+    },
+    "Settings" : {
+      "comment" : "Screen title",
+      "localizations" : {
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "设置"
+          }
+        },
+        "zh-HK" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "設定"
+          }
+        }
+      }
+    },
+    "Share Ledger" : {
+      "comment" : "Button",
+      "localizations" : {
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "共享账本"
+          }
+        },
+        "zh-HK" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "共享賬本"
+          }
+        }
+      }
+    },
+    "Shopping" : {
+      "comment" : "Default category",
+      "localizations" : {
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "购物"
+          }
+        },
+        "zh-HK" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "購物"
+          }
+        }
+      }
+    },
+    "Shows this ledger in Activity" : {
+      "comment" : "Ledger selection"
+    },
+    "Sign in to iCloud in Settings to sync across your devices and share with family. Your personal ledger still works on this device." : {
+      "localizations" : {
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "请在“设置”中登录 iCloud，即可在设备之间同步并与家人共享。个人账本仍可在此设备使用。"
+          }
+        },
+        "zh-HK" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "請在「設定」中登入 iCloud，即可在裝置之間同步並與家人共享。個人賬本仍可在此裝置使用。"
+          }
+        }
+      }
+    },
+    "Sign in to iCloud in System Settings, then return here to send an invite." : {
+
+    },
+    "Signed In" : {
+      "comment" : "iCloud account status",
+      "localizations" : {
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "已登录"
+          }
+        },
+        "zh-HK" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "已登入"
+          }
+        }
+      }
+    },
+    "Spend" : {
+      "comment" : "Field",
+      "localizations" : {
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "消费"
+          }
+        },
+        "zh-HK" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "消費"
+          }
+        }
+      }
+    },
+    "Spend tracking for individuals and families, using your Apple ID." : {
+      "localizations" : {
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "为个人与家庭而设的开支追踪，使用你的 Apple ID。"
+          }
+        },
+        "zh-HK" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "為個人與家庭而設的開支追蹤，使用你的 Apple ID。"
+          }
+        }
+      }
+    },
+    "Stop Sharing" : {
+      "comment" : "Button",
+      "localizations" : {
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "停止共享"
+          }
+        },
+        "zh-HK" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "停止共享"
+          }
+        }
+      }
+    },
+    "Subscriptions" : {
+      "comment" : "Default category",
+      "localizations" : {
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "订阅"
+          }
+        },
+        "zh-HK" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "訂閱"
+          }
+        }
+      }
+    },
+    "Sync Off" : {
+      "comment" : "iCloud account status"
+    },
+    "Tap a ledger to show it in Activity. Use the info button for settings and family sharing." : {
+
+    },
+    "Temporarily Unavailable" : {
+      "comment" : "iCloud account status",
+      "localizations" : {
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "暂时不可用"
+          }
+        },
+        "zh-HK" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "暫時無法使用"
+          }
+        }
+      }
+    },
+    "The billing currency is what this card or wallet charges. Dual-currency spends use it as the charged amount." : {
+      "localizations" : {
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "结算货币是此卡或钱包扣款所用的货币。双货币开支会用它作为入账金额。"
+          }
+        },
+        "zh-HK" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "結算貨幣是此卡或錢包扣款所用的貨幣。雙貨幣開支會用它作為入賬金額。"
+          }
+        }
+      }
+    },
+    "The selected file is empty." : {
+      "comment" : "Receipt error"
+    },
+    "This build keeps data on this Mac. Choose a Team in Xcode and enable CloudKit to turn on iCloud sync." : {
+      "localizations" : {
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "此版本将数据保存在这台 Mac 上。在 Xcode 中选择开发团队并启用 CloudKit 即可打开 iCloud 同步。"
+          }
+        },
+        "zh-HK" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "此版本會將資料留在這部 Mac。在 Xcode 選擇開發團隊並啟用 CloudKit，即可開啟 iCloud 同步。"
+          }
+        }
+      }
+    },
+    "This cannot be undone." : {
+
+    },
+    "This ledger reports in %@. Enter the equivalent total." : {
+
+    },
+    "This Month" : {
+      "comment" : "Insights range",
+      "localizations" : {
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "本月"
+          }
+        },
+        "zh-HK" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "本月"
+          }
+        }
+      }
+    },
+    "This Month’s Spend" : {
+      "comment" : "Insights headline",
+      "localizations" : {
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "本月开支"
+          }
+        },
+        "zh-HK" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "本月開支"
+          }
+        }
+      }
+    },
+    "Time" : {
+      "comment" : "Field"
+    },
+    "Total" : {
+      "comment" : "Chart axis",
+      "localizations" : {
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "合计"
+          }
+        },
+        "zh-HK" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "合計"
+          }
+        }
+      }
+    },
+    "Totals in %@." : {
+
+    },
+    "Transport" : {
+      "comment" : "Default category",
+      "localizations" : {
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "交通"
+          }
+        },
+        "zh-HK" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "交通"
+          }
+        }
+      }
+    },
+    "Travel" : {
+      "comment" : "Default category",
+      "localizations" : {
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "旅行"
+          }
+        },
+        "zh-HK" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "旅行"
+          }
+        }
+      }
+    },
+    "Unknown" : {
+      "comment" : "iCloud account status",
+      "localizations" : {
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "未知"
+          }
+        },
+        "zh-HK" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "未知"
+          }
+        }
+      }
+    },
+    "Unknown Participant" : {
+      "comment" : "Fallback share participant name",
+      "localizations" : {
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "未知成员"
+          }
+        },
+        "zh-HK" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "未知成員"
+          }
+        }
+      }
+    },
+    "Use a photo (JPEG, PNG, HEIC) or a PDF." : {
+      "comment" : "Receipt error"
+    },
+    "Utilities" : {
+      "comment" : "Default category",
+      "localizations" : {
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "公用事业"
+          }
+        },
+        "zh-HK" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "公用事業"
+          }
+        }
+      }
+    },
+    "View receipt" : {
+      "comment" : "Button"
+    },
+    "WeChat" : {
+      "comment" : "Payment method kind",
+      "localizations" : {
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "微信支付"
+          }
+        },
+        "zh-HK" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "微信支付"
+          }
+        }
+      }
+    },
+    "What left the wallet, with an approximate %@ equivalent." : {
+      "comment" : "Insights subtitle"
+    },
+    "What you consumed, with an approximate %@ equivalent." : {
+      "comment" : "Insights subtitle"
+    },
+    "When spend and charge currencies differ, enter what the card or wallet actually billed." : {
+      "extractionState" : "stale",
+      "localizations" : {
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "当消费货币与入账货币不同时，请输入卡或钱包实际扣除的金额。"
+          }
+        },
+        "zh-HK" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "當消費貨幣與入賬貨幣不同時，請輸入卡或錢包實際扣除的金額。"
+          }
+        }
+      }
+    },
+    "Working offline. Your data stays on this device until iCloud is available." : {
+      "extractionState" : "stale",
+      "localizations" : {
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "离线使用中。数据会留在此设备，直至 iCloud 可用。"
+          }
+        },
+        "zh-HK" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "離線使用中。資料會留在此裝置，直至 iCloud 可用。"
+          }
+        }
+      }
+    },
+    "You" : {
+      "localizations" : {
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "你"
+          }
+        },
+        "zh-HK" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "你"
+          }
+        }
+      }
+    }
+  },
+  "version" : "1.1"
+}
