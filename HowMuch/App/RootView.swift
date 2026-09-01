@@ -2,6 +2,63 @@ import CoreData
 import SwiftUI
 
 struct RootView: View {
+    @EnvironmentObject private var persistence: PersistenceController
+    @Environment(\.scenePhase) private var scenePhase
+
+    var body: some View {
+        Group {
+            if persistence.isDataAvailable {
+                LoadedRootView()
+                    .id(persistence.stackGeneration)
+            } else {
+                DataLockedView()
+            }
+        }
+        .onChange(of: scenePhase) { _, phase in
+            if phase == .active {
+                persistence.invalidateLedgerAccess()
+            }
+        }
+    }
+}
+
+struct DataAvailabilityGate<Content: View>: View {
+    @EnvironmentObject private var persistence: PersistenceController
+    @ViewBuilder let content: () -> Content
+
+    var body: some View {
+        if persistence.isDataAvailable {
+            content()
+                .id(persistence.stackGeneration)
+        } else {
+            DataLockedView()
+        }
+    }
+}
+
+struct DataLockedView: View {
+    @EnvironmentObject private var persistence: PersistenceController
+
+    var body: some View {
+        VStack(spacing: 16) {
+            Image(systemName: persistence.isLocalOnly ? "externaldrive.badge.exclamationmark" : "lock.icloud")
+                .font(.largeTitle)
+                .foregroundStyle(.secondary)
+            Text(
+                persistence.isLocalOnly
+                    ? String(localized: "Local Data Unavailable", comment: "Unavailable data title")
+                    : String(localized: "iCloud Data Locked", comment: "Unavailable data title")
+            )
+                .font(.title2.weight(.semibold))
+            iCloudStatusBanner()
+                .frame(maxWidth: 520)
+        }
+        .padding(24)
+        .frame(maxWidth: .infinity, maxHeight: .infinity)
+    }
+}
+
+private struct LoadedRootView: View {
     @Environment(\.horizontalSizeClass) private var sizeClass
     @EnvironmentObject private var persistence: PersistenceController
     @Environment(AppState.self) private var appState
@@ -65,6 +122,21 @@ struct RootView: View {
             .environment(appState)
             .environment(accountMonitor)
         }
+        .sheet(isPresented: Bindable(appState).presentingSettings) {
+            NavigationStack {
+                SettingsView()
+                    .toolbar {
+                        ToolbarItem(placement: .confirmationAction) {
+                            Button(String(localized: "Done", comment: "Button")) {
+                                appState.presentingSettings = false
+                            }
+                        }
+                    }
+            }
+            .environmentObject(persistence)
+            .environment(appState)
+            .environment(accountMonitor)
+        }
         .sheet(isPresented: Binding(
             get: { appState.expenseToEdit != nil },
             set: { if !$0 { appState.expenseToEdit = nil } }
@@ -76,6 +148,21 @@ struct RootView: View {
                 .environmentObject(persistence)
                 .environment(appState)
             }
+        }
+        #endif
+        #if os(macOS)
+        .sheet(isPresented: Bindable(appState).presentingSettings) {
+            SettingsView()
+                .environmentObject(persistence)
+                .environment(appState)
+                .environment(accountMonitor)
+                .toolbar {
+                    ToolbarItem(placement: .confirmationAction) {
+                        Button(String(localized: "Done", comment: "Button")) {
+                            appState.presentingSettings = false
+                        }
+                    }
+                }
         }
         #endif
     }

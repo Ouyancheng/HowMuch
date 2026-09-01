@@ -1,0 +1,12 @@
+{
+  "ledgerName": "Legacy Travel",
+  "ledgerUUID": "10000000-0000-0000-0000-000000000001",
+  "categoryName": "Legacy Dining",
+  "categoryUUID": "20000000-0000-0000-0000-000000000001",
+  "paymentMethodName": "Legacy Cash",
+  "paymentMethodUUID": "30000000-0000-0000-0000-000000000001",
+  "expenseUUID": "40000000-0000-0000-0000-000000000001",
+  "merchant": "Legacy Cafe",
+  "amount": "42.50",
+  "currency": "USD"
+}

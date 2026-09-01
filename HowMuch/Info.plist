@@ -4,11 +4,48 @@
 <dict>
 	<key>CKSharingSupported</key>
 	<true/>
+	<key>CFBundleDocumentTypes</key>
+	<array>
+		<dict>
+			<key>CFBundleTypeName</key>
+			<string>HowMuch Archive</string>
+			<key>CFBundleTypeRole</key>
+			<string>Editor</string>
+			<key>LSItemContentTypes</key>
+			<array>
+				<string>com.howmuch.app.archive</string>
+			</array>
+			<key>LSTypeIsPackage</key>
+			<true/>
+		</dict>
+	</array>
+	<key>LSSupportsOpeningDocumentsInPlace</key>
+	<true/>
 	<key>NSPhotoLibraryUsageDescription</key>
-	<string>HowMuch attaches a photo of a receipt to an expense.</string>
+	<string>HowMuch uses the photo you choose only to attach a receipt to an expense.</string>
 	<key>UIBackgroundModes</key>
 	<array>
 		<string>remote-notification</string>
+	</array>
+	<key>UTExportedTypeDeclarations</key>
+	<array>
+		<dict>
+			<key>UTTypeConformsTo</key>
+			<array>
+				<string>com.apple.package</string>
+			</array>
+			<key>UTTypeDescription</key>
+			<string>HowMuch Archive</string>
+			<key>UTTypeIdentifier</key>
+			<string>com.howmuch.app.archive</string>
+			<key>UTTypeTagSpecification</key>
+			<dict>
+				<key>public.filename-extension</key>
+				<array>
+					<string>howmuch</string>
+				</array>
+			</dict>
+		</dict>
 	</array>
 </dict>
 </plist>

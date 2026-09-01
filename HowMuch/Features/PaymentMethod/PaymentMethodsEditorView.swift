@@ -8,6 +8,10 @@ struct PaymentMethodsEditorView: View {
     @State private var showingAdd = false
     @State private var removalError: String?
 
+    private var isWritable: Bool {
+        persistence.canWrite(ledger)
+    }
+
     init(ledger: Ledger) {
         _ledger = ObservedObject(wrappedValue: ledger)
         _methods = FetchRequest(
@@ -36,13 +40,14 @@ struct PaymentMethodsEditorView: View {
                     }
                 }
                 .contextMenu {
-                    if method.canBeRemoved {
+                    if isWritable && method.canBeRemoved {
                         Button(String(localized: "Remove", comment: "Button"), role: .destructive) {
                             remove(method)
                         }
                     }
                 }
-                .deleteDisabled(!method.canBeRemoved)
+                .disabled(!isWritable)
+                .deleteDisabled(!isWritable || !method.canBeRemoved)
             }
             .onDelete(perform: delete)
         }
@@ -54,6 +59,7 @@ struct PaymentMethodsEditorView: View {
                 } label: {
                     Label(String(localized: "Add Payment Method", comment: "Toolbar"), systemImage: "plus")
                 }
+                .disabled(!isWritable)
             }
         }
         .sheet(isPresented: $showingAdd) {
@@ -74,6 +80,13 @@ struct PaymentMethodsEditorView: View {
         } message: {
             if let removalError {
                 Text(removalError)
+            }
+        }
+        .safeAreaInset(edge: .bottom) {
+            if !isWritable {
+                Text(LedgerAccess.readOnlyExplanation)
+                    .hmWrappingFooter()
+                    .padding()
             }
         }
     }
@@ -98,13 +111,21 @@ struct PaymentMethodEditorView: View {
     var onSaved: ((PaymentMethod) -> Void)? = nil
 
     @Environment(\.dismiss) private var dismiss
-    @Environment(\.managedObjectContext) private var context
     @EnvironmentObject private var persistence: PersistenceController
 
     @State private var name = ""
     @State private var billingCurrency = CurrencyCatalog.localeCurrency
     @State private var kind: PaymentKind = .cash
     @State private var errorMessage: String?
+    @ScaledMetric(relativeTo: .body) private var heroSize = 76
+
+    private var targetLedger: Ledger? {
+        method?.ledger ?? ledger
+    }
+
+    private var isWritable: Bool {
+        targetLedger.map(persistence.canWrite) ?? false
+    }
 
     var body: some View {
         ScrollView {
@@ -124,6 +145,7 @@ struct PaymentMethodEditorView: View {
             }
             .padding(20)
         }
+        .disabled(!isWritable)
         .scrollBounceBehavior(.basedOnSize)
         .navigationTitle(method == nil
             ? String(localized: "Add Payment Method", comment: "Screen title")
@@ -139,6 +161,7 @@ struct PaymentMethodEditorView: View {
             ToolbarItem(placement: .confirmationAction) {
                 Button(String(localized: "Save", comment: "Button"), action: save)
                     .keyboardShortcut(.defaultAction)
+                    .disabled(!isWritable)
             }
         }
         .onAppear {
@@ -155,10 +178,10 @@ struct PaymentMethodEditorView: View {
     private var hero: some View {
         VStack(spacing: 10) {
             Image(systemName: kind.symbolName)
-                .font(.system(size: 32, weight: .medium))
+                .font(.largeTitle.weight(.medium))
                 .symbolRenderingMode(.hierarchical)
                 .foregroundStyle(Color.accentColor)
-                .frame(width: 76, height: 76)
+                .frame(width: heroSize, height: heroSize)
                 .hmGlassInteractive(in: Circle())
             Text(kind.title)
                 .font(.headline)
@@ -217,7 +240,7 @@ struct PaymentMethodEditorView: View {
             }
             .labelsHidden()
             .pickerStyle(.menu)
-            Text("The billing currency is what this card or wallet charges. Dual-currency spends use it as the charged amount.")
+            Text(String(localized: "The billing currency is what this card or wallet charges. Dual-currency spends use it as the charged amount."))
                 .hmWrappingFooter()
         }
         .padding(16)
@@ -254,19 +277,20 @@ struct PaymentMethodEditorView: View {
             errorMessage = String(localized: "Name is required", comment: "Validation")
             return
         }
-        let targetLedger = method?.ledger ?? ledger
         guard let targetLedger else { return }
-        let record = method ?? PaymentMethod(context: context)
-        if method == nil {
-            persistence.assign(record, toSameStoreAs: targetLedger)
-            record.ledger = targetLedger
+        do {
+            let record = try persistence.savePaymentMethod(
+                method,
+                in: targetLedger,
+                name: trimmed,
+                billingCurrency: billingCurrency,
+                kind: kind
+            )
+            onSaved?(record)
+            dismiss()
+        } catch {
+            errorMessage = error.localizedDescription
         }
-        record.name = trimmed
-        record.billingCurrency = billingCurrency
-        record.kind = kind.rawValue
-        persistence.save()
-        onSaved?(record)
-        dismiss()
     }
 }
 
@@ -283,8 +307,8 @@ struct PaymentKindChip: View {
                     .symbolRenderingMode(.hierarchical)
                 Text(kind.title)
                     .font(.caption)
-                    .lineLimit(1)
-                    .minimumScaleFactor(0.8)
+                    .lineLimit(2)
+                    .multilineTextAlignment(.center)
             }
             .frame(maxWidth: .infinity)
             .padding(.vertical, 12)

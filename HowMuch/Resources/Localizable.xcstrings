@@ -14,8 +14,60 @@
         }
       }
     },
+    "%@ completed" : {
+      "comment" : "CloudKit event status"
+    },
+    "%@ failed" : {
+      "comment" : "CloudKit event status"
+    },
+    "%@ in progress" : {
+      "comment" : "CloudKit event status"
+    },
+    "%@, %@, %@" : {
+      "comment" : "Category row accessibility label",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "new",
+            "value" : "%1$@, %2$@, %3$@"
+          }
+        }
+      }
+    },
+    "%lld ledgers, %lld expenses, %lld receipts. %lld UUIDs already exist." : {
+      "comment" : "Archive import preview",
+      "localizations" : {
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "%1$lld 个账本、%2$lld 笔开支、%3$lld 张收据。已有 %4$lld 个 UUID。"
+          }
+        },
+        "zh-HK" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "%1$lld 個賬本、%2$lld 筆開支、%3$lld 張收據。已有 %4$lld 個 UUID。"
+          }
+        }
+      }
+    },
     "≈ %@" : {
 
+    },
+    "A complete private copy will be saved automatically. The shared ledger will then be removed for every participant." : {
+      "comment" : "Confirmation message"
+    },
+    "A pending expense move could not be verified. Both copies were preserved for recovery." : {
+
+    },
+    "A pending expense move is waiting for safe recovery: %@" : {
+      "comment" : "Expense transfer recovery diagnostic"
+    },
+    "A private copy could not be saved. Sharing was not changed: %@" : {
+      "comment" : "Share error"
+    },
+    "A stop-sharing operation is already in progress." : {
+      "comment" : "Share error"
     },
     "About" : {
       "comment" : "Section",
@@ -143,6 +195,23 @@
         }
       }
     },
+    "Added by %@" : {
+      "comment" : "VoiceOver expense attribution",
+      "localizations" : {
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "由%1$@添加"
+          }
+        },
+        "zh-HK" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "由%1$@新增"
+          }
+        }
+      }
+    },
     "Alipay" : {
       "comment" : "Payment method kind",
       "localizations" : {
@@ -160,8 +229,21 @@
         }
       }
     },
-    "All currencies, in %@. Default rates when an expense was not entered in this currency." : {
-
+    "All currencies, in %@. Default rates are used when an expense was not entered in this currency." : {
+      "localizations" : {
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "所有货币均以%1$@显示。若开支并非以此货币输入，则使用默认汇率。"
+          }
+        },
+        "zh-HK" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "所有貨幣均以%1$@顯示。若開支並非以此貨幣輸入，則使用預設匯率。"
+          }
+        }
+      }
     },
     "All Time" : {
       "comment" : "Insights range",
@@ -181,7 +263,7 @@
       }
     },
     "Amount" : {
-      "comment" : "Field",
+      "comment" : "Field\nForm section",
       "localizations" : {
         "zh-Hans" : {
           "stringUnit" : {
@@ -196,6 +278,9 @@
           }
         }
       }
+    },
+    "Amount %@" : {
+      "comment" : "VoiceOver currency amount"
     },
     "Amount must be greater than zero" : {
       "comment" : "Validation",
@@ -214,8 +299,11 @@
         }
       }
     },
+    "Approximately %@" : {
+      "comment" : "VoiceOver converted amount"
+    },
     "Archive" : {
-      "extractionState" : "stale",
+      "comment" : "Settings section",
       "localizations" : {
         "zh-Hans" : {
           "stringUnit" : {
@@ -227,6 +315,108 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "封存"
+          }
+        }
+      }
+    },
+    "Archive Contents" : {
+      "comment" : "Archive section",
+      "localizations" : {
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "归档内容"
+          }
+        },
+        "zh-HK" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "封存檔內容"
+          }
+        }
+      }
+    },
+    "Archive exported successfully." : {
+      "comment" : "Archive success",
+      "localizations" : {
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "归档已成功导出。"
+          }
+        },
+        "zh-HK" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "封存檔已成功輸出。"
+          }
+        }
+      }
+    },
+    "Archive imported successfully." : {
+      "comment" : "Archive success",
+      "localizations" : {
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "归档已成功导入。"
+          }
+        },
+        "zh-HK" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "封存檔已成功輸入。"
+          }
+        }
+      }
+    },
+    "Archive record counts do not match: %@" : {
+      "comment" : "Archive error",
+      "localizations" : {
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "归档记录数不匹配：%1$@"
+          }
+        },
+        "zh-HK" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "封存檔記錄數目不相符：%1$@"
+          }
+        }
+      }
+    },
+    "Archive version %lld is not supported." : {
+      "comment" : "Archive error",
+      "localizations" : {
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "不支持归档版本 %1$lld。"
+          }
+        },
+        "zh-HK" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "不支援封存檔版本 %1$lld。"
+          }
+        }
+      }
+    },
+    "Archives are portable local copies. Import always writes to your private data store and never restores sharing." : {
+      "comment" : "Archive explanation",
+      "localizations" : {
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "归档是可移植的本地副本。导入始终写入你的私有数据存储，且不会恢复共享。"
+          }
+        },
+        "zh-HK" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "封存檔是可攜式本機副本。輸入內容只會寫入你的私人資料儲存區，且不會恢復共享。"
           }
         }
       }
@@ -264,6 +454,40 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "結算貨幣"
+          }
+        }
+      }
+    },
+    "Blue" : {
+      "comment" : "Category color name",
+      "localizations" : {
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "蓝色"
+          }
+        },
+        "zh-HK" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "藍色"
+          }
+        }
+      }
+    },
+    "Bus" : {
+      "comment" : "Category icon name",
+      "localizations" : {
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "公交车"
+          }
+        },
+        "zh-HK" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "巴士"
           }
         }
       }
@@ -342,6 +566,23 @@
         }
       }
     },
+    "Car" : {
+      "comment" : "Category icon name",
+      "localizations" : {
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "汽车"
+          }
+        },
+        "zh-HK" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "汽車"
+          }
+        }
+      }
+    },
     "Cash" : {
       "comment" : "Default payment method\nPayment method kind",
       "localizations" : {
@@ -380,7 +621,7 @@
       }
     },
     "Category" : {
-      "comment" : "Chart axis\nField\nScreen title",
+      "comment" : "Chart axis\nField\nScreen title\nUnknown category icon name",
       "localizations" : {
         "zh-Hans" : {
           "stringUnit" : {
@@ -392,6 +633,43 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "類別"
+          }
+        }
+      }
+    },
+    "Category %@" : {
+      "comment" : "VoiceOver expense category"
+    },
+    "Category totals in %@." : {
+      "comment" : "Insights chart summary",
+      "localizations" : {
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "类别合计以%1$@计。"
+          }
+        },
+        "zh-HK" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "類別合計以%1$@計。"
+          }
+        }
+      }
+    },
+    "Change Reporting Currency?" : {
+      "comment" : "Currency confirmation title",
+      "localizations" : {
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "更改报告货币？"
+          }
+        },
+        "zh-HK" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "更改報告貨幣？"
           }
         }
       }
@@ -433,6 +711,9 @@
           }
         }
       }
+    },
+    "Checking iCloud" : {
+      "comment" : "Banner title"
     },
     "Checking…" : {
       "comment" : "iCloud account status",
@@ -505,6 +786,9 @@
         }
       }
     },
+    "CloudKit reported an unknown error." : {
+      "comment" : "Sync error"
+    },
     "CloudKit schema initialized." : {
       "extractionState" : "stale",
       "localizations" : {
@@ -575,6 +859,23 @@
         }
       }
     },
+    "Coral" : {
+      "comment" : "Category color name",
+      "localizations" : {
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "珊瑚红"
+          }
+        },
+        "zh-HK" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "珊瑚紅"
+          }
+        }
+      }
+    },
     "Create Family Ledger" : {
       "comment" : "Button",
       "localizations" : {
@@ -605,6 +906,57 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "建立個人賬本"
+          }
+        }
+      }
+    },
+    "Creates a separate copy of every record with new UUIDs." : {
+      "comment" : "Archive mode explanation",
+      "localizations" : {
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "使用新 UUID 为每条记录创建独立副本。"
+          }
+        },
+        "zh-HK" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "使用新的 UUID 為每項記錄建立獨立副本。"
+          }
+        }
+      }
+    },
+    "Creates missing records and overwrites matching attributes and receipts. Records absent from the archive are never deleted." : {
+      "comment" : "Archive mode explanation",
+      "localizations" : {
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "创建缺失记录并覆盖匹配的属性和收据。绝不会删除归档中没有的记录。"
+          }
+        },
+        "zh-HK" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "建立缺少的記錄並覆寫相符的屬性和收據。絕不會刪除封存檔中沒有的記錄。"
+          }
+        }
+      }
+    },
+    "Creates missing UUIDs and leaves existing records unchanged." : {
+      "comment" : "Archive mode explanation",
+      "localizations" : {
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "创建缺失的 UUID，并保留现有记录不变。"
+          }
+        },
+        "zh-HK" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "建立缺少的 UUID，並保留現有記錄不變。"
           }
         }
       }
@@ -642,6 +994,43 @@
           }
         }
       }
+    },
+    "Custom color" : {
+      "comment" : "Unknown category color name",
+      "localizations" : {
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "自定义颜色"
+          }
+        },
+        "zh-HK" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "自訂顏色"
+          }
+        }
+      }
+    },
+    "Cyan" : {
+      "comment" : "Category color name",
+      "localizations" : {
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "青色"
+          }
+        },
+        "zh-HK" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "青色"
+          }
+        }
+      }
+    },
+    "Data Store" : {
+      "comment" : "Field"
     },
     "Date" : {
       "comment" : "Field",
@@ -736,7 +1125,7 @@
       }
     },
     "Dining" : {
-      "comment" : "Default category",
+      "comment" : "Category icon name\nDefault category",
       "localizations" : {
         "zh-Hans" : {
           "stringUnit" : {
@@ -787,7 +1176,7 @@
       }
     },
     "Education" : {
-      "comment" : "Default category",
+      "comment" : "Category icon name\nDefault category",
       "localizations" : {
         "zh-Hans" : {
           "stringUnit" : {
@@ -799,6 +1188,23 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "教育"
+          }
+        }
+      }
+    },
+    "Emerald" : {
+      "comment" : "Category color name",
+      "localizations" : {
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "翠绿色"
+          }
+        },
+        "zh-HK" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "翠綠色"
           }
         }
       }
@@ -824,7 +1230,7 @@
 
     },
     "Entertainment" : {
-      "comment" : "Default category",
+      "comment" : "Category icon name\nDefault category",
       "localizations" : {
         "zh-Hans" : {
           "stringUnit" : {
@@ -839,6 +1245,12 @@
           }
         }
       }
+    },
+    "Error" : {
+      "comment" : "Sync status"
+    },
+    "Existing data could not be safely adopted." : {
+
     },
     "Expense" : {
       "comment" : "Fallback expense title",
@@ -856,6 +1268,35 @@
           }
         }
       }
+    },
+    "Expense Could Not Be Deleted" : {
+      "comment" : "Alert"
+    },
+    "Export" : {
+      "comment" : "CloudKit event"
+    },
+    "Export Archive…" : {
+      "comment" : "Archive action",
+      "localizations" : {
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "导出归档…"
+          }
+        },
+        "zh-HK" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "輸出封存檔…"
+          }
+        }
+      }
+    },
+    "Exporting…" : {
+      "comment" : "Sync status"
+    },
+    "Failed" : {
+      "comment" : "Store status"
     },
     "Family" : {
       "comment" : "Ledger kind\nSection\nSidebar section",
@@ -907,8 +1348,25 @@
         }
       }
     },
+    "Favorite" : {
+      "comment" : "Category icon name",
+      "localizations" : {
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "收藏"
+          }
+        },
+        "zh-HK" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "喜愛"
+          }
+        }
+      }
+    },
     "Food" : {
-      "comment" : "Default category",
+      "comment" : "Category icon name\nDefault category",
       "localizations" : {
         "zh-Hans" : {
           "stringUnit" : {
@@ -920,6 +1378,23 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "飲食"
+          }
+        }
+      }
+    },
+    "Games" : {
+      "comment" : "Category icon name",
+      "localizations" : {
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "游戏"
+          }
+        },
+        "zh-HK" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "遊戲"
           }
         }
       }
@@ -941,6 +1416,23 @@
         }
       }
     },
+    "Gift" : {
+      "comment" : "Category icon name",
+      "localizations" : {
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "礼物"
+          }
+        },
+        "zh-HK" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "禮物"
+          }
+        }
+      }
+    },
     "Gifts" : {
       "comment" : "Default category",
       "localizations" : {
@@ -958,8 +1450,42 @@
         }
       }
     },
+    "Gold" : {
+      "comment" : "Category color name",
+      "localizations" : {
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "金色"
+          }
+        },
+        "zh-HK" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "金色"
+          }
+        }
+      }
+    },
+    "Green" : {
+      "comment" : "Category color name",
+      "localizations" : {
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "绿色"
+          }
+        },
+        "zh-HK" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "綠色"
+          }
+        }
+      }
+    },
     "Groceries" : {
-      "comment" : "Default category",
+      "comment" : "Category icon name\nDefault category",
       "localizations" : {
         "zh-Hans" : {
           "stringUnit" : {
@@ -976,7 +1502,7 @@
       }
     },
     "Health" : {
-      "comment" : "Default category",
+      "comment" : "Category icon name\nDefault category",
       "localizations" : {
         "zh-Hans" : {
           "stringUnit" : {
@@ -988,6 +1514,23 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "健康"
+          }
+        }
+      }
+    },
+    "Home" : {
+      "comment" : "Category icon name",
+      "localizations" : {
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "家庭"
+          }
+        },
+        "zh-HK" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "家居"
           }
         }
       }
@@ -1013,7 +1556,7 @@
 
     },
     "iCloud" : {
-      "comment" : "Field",
+      "comment" : "Field\nSection\nSettings tab",
       "localizations" : {
         "zh-Hans" : {
           "stringUnit" : {
@@ -1028,6 +1571,15 @@
           }
         }
       }
+    },
+    "iCloud access is restricted." : {
+      "comment" : "iCloud status"
+    },
+    "iCloud Data Could Not Load" : {
+      "comment" : "Banner title"
+    },
+    "iCloud Data Locked" : {
+      "comment" : "Unavailable data title"
     },
     "iCloud is not available. Sign in to iCloud to share a family ledger." : {
       "comment" : "Share error",
@@ -1063,6 +1615,9 @@
         }
       }
     },
+    "iCloud is temporarily unavailable." : {
+      "comment" : "iCloud status"
+    },
     "iCloud Sync" : {
       "comment" : "Field",
       "localizations" : {
@@ -1079,6 +1634,9 @@
           }
         }
       }
+    },
+    "iCloud Sync Needs Attention" : {
+      "comment" : "Banner title"
     },
     "iCloud Sync Off" : {
       "comment" : "Banner title",
@@ -1131,6 +1689,128 @@
         }
       }
     },
+    "Import" : {
+      "comment" : "Button\nCloudKit event",
+      "localizations" : {
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "导入"
+          }
+        },
+        "zh-HK" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "輸入"
+          }
+        }
+      }
+    },
+    "Import Archive…" : {
+      "comment" : "Archive action",
+      "localizations" : {
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "导入归档…"
+          }
+        },
+        "zh-HK" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "輸入封存檔…"
+          }
+        }
+      }
+    },
+    "Import as Copies" : {
+      "comment" : "Archive import mode",
+      "localizations" : {
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "导入为副本"
+          }
+        },
+        "zh-HK" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "輸入為副本"
+          }
+        }
+      }
+    },
+    "Import Mode" : {
+      "comment" : "Archive field",
+      "localizations" : {
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "导入模式"
+          }
+        },
+        "zh-HK" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "輸入模式"
+          }
+        }
+      }
+    },
+    "Import Preview" : {
+      "comment" : "Archive title",
+      "localizations" : {
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "导入预览"
+          }
+        },
+        "zh-HK" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "輸入預覽"
+          }
+        }
+      }
+    },
+    "Importing…" : {
+      "comment" : "Sync status"
+    },
+    "Include Receipts" : {
+      "comment" : "Archive export option",
+      "localizations" : {
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "包含收据"
+          }
+        },
+        "zh-HK" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "包括收據"
+          }
+        }
+      }
+    },
+    "Indigo" : {
+      "comment" : "Category color name",
+      "localizations" : {
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "靛蓝色"
+          }
+        },
+        "zh-HK" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "靛藍色"
+          }
+        }
+      }
+    },
     "Insights" : {
       "comment" : "Screen title",
       "localizations" : {
@@ -1148,7 +1828,11 @@
         }
       }
     },
+    "Invitation Needs Attention" : {
+      "comment" : "Banner title"
+    },
     "Invite people with Apple ID via Messages or Mail after you create the ledger." : {
+      "extractionState" : "stale",
       "localizations" : {
         "zh-Hans" : {
           "stringUnit" : {
@@ -1198,14 +1882,60 @@
         }
       }
     },
-    "Invite someone with their Apple ID using Messages or Mail. They get the same family expenses, not a bill split." : {
-
+    "Invite people with their Apple Account via Messages or Mail after you create the ledger." : {
+      "localizations" : {
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "创建账本后，可通过“信息”或“邮件”邀请使用 Apple 账户的成员。"
+          }
+        },
+        "zh-HK" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "建立賬本後，可透過「訊息」或「郵件」邀請使用 Apple 帳户的成員。"
+          }
+        }
+      }
+    },
+    "Invite someone with their Apple Account using Messages or Mail. They get the same family expenses, not a bill split." : {
+      "localizations" : {
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "通过“信息”或“邮件”邀请使用 Apple 账户的成员。他们会看到相同的家庭开支，而不是分账。"
+          }
+        },
+        "zh-HK" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "透過「訊息」或「郵件」邀請使用 Apple 帳户的成員。他們會看到相同的家庭開支，而不是分賬。"
+          }
+        }
+      }
     },
     "Keep at least one category." : {
       "comment" : "Validation"
     },
     "Keep at least one payment method." : {
       "comment" : "Validation"
+    },
+    "Keep Historical Values" : {
+      "comment" : "Currency action",
+      "localizations" : {
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "保留历史值"
+          }
+        },
+        "zh-HK" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "保留歷史數值"
+          }
+        }
+      }
     },
     "Kind" : {
       "comment" : "Field",
@@ -1241,6 +1971,21 @@
         }
       }
     },
+    "Last Event" : {
+      "comment" : "Field"
+    },
+    "Last Export" : {
+      "comment" : "Field"
+    },
+    "Last Import" : {
+      "comment" : "Field"
+    },
+    "Last Sync" : {
+      "comment" : "Field"
+    },
+    "Leave and Remove Local Data" : {
+      "comment" : "Confirmation button"
+    },
     "Leave Family" : {
       "comment" : "Button",
       "localizations" : {
@@ -1258,8 +2003,11 @@
         }
       }
     },
+    "Leave this family ledger?" : {
+      "comment" : "Confirmation title"
+    },
     "Ledger" : {
-      "comment" : "Field",
+      "comment" : "Field\nSection",
       "localizations" : {
         "zh-Hans" : {
           "stringUnit" : {
@@ -1298,6 +2046,44 @@
         }
       }
     },
+    "Loaded" : {
+      "comment" : "Store status"
+    },
+    "Loading iCloud Data" : {
+      "comment" : "Banner title"
+    },
+    "Loading…" : {
+      "comment" : "Store status"
+    },
+    "Local data could not be safely prepared." : {
+
+    },
+    "Local Data Could Not Load" : {
+      "comment" : "Banner title"
+    },
+    "Local Data Unavailable" : {
+      "comment" : "Unavailable data title"
+    },
+    "Locked" : {
+      "comment" : "Store status"
+    },
+    "Magenta" : {
+      "comment" : "Category color name",
+      "localizations" : {
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "品红色"
+          }
+        },
+        "zh-HK" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "洋紅色"
+          }
+        }
+      }
+    },
     "Manage Sharing" : {
       "comment" : "Button",
       "localizations" : {
@@ -1311,6 +2097,23 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "管理共享"
+          }
+        }
+      }
+    },
+    "Me" : {
+      "comment" : "Local expense creator fallback",
+      "localizations" : {
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "我"
+          }
+        },
+        "zh-HK" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "我"
           }
         }
       }
@@ -1383,6 +2186,91 @@
         }
       }
     },
+    "Merge by UUID" : {
+      "comment" : "Archive import mode",
+      "localizations" : {
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "按 UUID 合并"
+          }
+        },
+        "zh-HK" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "按 UUID 合併"
+          }
+        }
+      }
+    },
+    "Move %@ down" : {
+      "comment" : "Category reorder action",
+      "localizations" : {
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "下移%1$@"
+          }
+        },
+        "zh-HK" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "向下移動%1$@"
+          }
+        }
+      }
+    },
+    "Move %@ up" : {
+      "comment" : "Category reorder action",
+      "localizations" : {
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "上移%1$@"
+          }
+        },
+        "zh-HK" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "向上移動%1$@"
+          }
+        }
+      }
+    },
+    "Move Down" : {
+      "comment" : "Category reorder action",
+      "localizations" : {
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "下移"
+          }
+        },
+        "zh-HK" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "向下移動"
+          }
+        }
+      }
+    },
+    "Move Up" : {
+      "comment" : "Category reorder action",
+      "localizations" : {
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "上移"
+          }
+        },
+        "zh-HK" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "向上移動"
+          }
+        }
+      }
+    },
     "Name" : {
       "comment" : "Field",
       "localizations" : {
@@ -1418,7 +2306,7 @@
       }
     },
     "New Expense" : {
-      "comment" : "Screen title\nToolbar",
+      "comment" : "Menu item\nScreen title\nToolbar",
       "localizations" : {
         "zh-Hans" : {
           "stringUnit" : {
@@ -1435,7 +2323,7 @@
       }
     },
     "New Family Ledger" : {
-      "comment" : "List action\nScreen title\nSidebar action\nToolbar",
+      "comment" : "List action\nMenu item\nScreen title\nSidebar action\nToolbar",
       "localizations" : {
         "zh-Hans" : {
           "stringUnit" : {
@@ -1469,7 +2357,7 @@
       }
     },
     "New Personal Ledger" : {
-      "comment" : "List action\nScreen title\nSettings action\nSidebar action\nToolbar",
+      "comment" : "List action\nMenu item\nScreen title\nSettings action\nSidebar action\nToolbar",
       "localizations" : {
         "zh-Hans" : {
           "stringUnit" : {
@@ -1484,6 +2372,9 @@
           }
         }
       }
+    },
+    "No default exchange rate is available for %@. No currency values were changed." : {
+      "comment" : "Currency error"
     },
     "No Expenses" : {
       "comment" : "Empty title",
@@ -1592,6 +2483,7 @@
     },
     "Off" : {
       "comment" : "Toggle off",
+      "extractionState" : "stale",
       "localizations" : {
         "zh-Hans" : {
           "stringUnit" : {
@@ -1607,11 +2499,15 @@
         }
       }
     },
+    "Off — Local Only" : {
+      "comment" : "Sync status"
+    },
     "OK" : {
       "comment" : "Button"
     },
     "On" : {
       "comment" : "Toggle on",
+      "extractionState" : "stale",
       "localizations" : {
         "zh-Hans" : {
           "stringUnit" : {
@@ -1627,11 +2523,37 @@
         }
       }
     },
+    "On %@" : {
+      "comment" : "VoiceOver expense date"
+    },
+    "Only the owner can share or manage this family ledger." : {
+      "comment" : "Share error"
+    },
+    "Opening the private and shared stores for this account." : {
+
+    },
     "Optional. Photos and PDFs, up to 10 MB." : {
 
     },
+    "Orange" : {
+      "comment" : "Category color name",
+      "localizations" : {
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "橙色"
+          }
+        },
+        "zh-HK" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "橙色"
+          }
+        }
+      }
+    },
     "Other" : {
-      "comment" : "Default category\nPayment method kind",
+      "comment" : "Category icon name\nDefault category\nPayment method kind",
       "localizations" : {
         "zh-Hans" : {
           "stringUnit" : {
@@ -1683,7 +2605,10 @@
       }
     },
     "Paid with" : {
-      "comment" : "Field"
+      "comment" : "Field\nForm section"
+    },
+    "Paid with %@" : {
+      "comment" : "VoiceOver payment method"
     },
     "Participants" : {
       "comment" : "Section",
@@ -1830,10 +2755,98 @@
         }
       }
     },
+    "Pets" : {
+      "comment" : "Category icon name",
+      "localizations" : {
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "宠物"
+          }
+        },
+        "zh-HK" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "寵物"
+          }
+        }
+      }
+    },
+    "Phone" : {
+      "comment" : "Category icon name",
+      "localizations" : {
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "手机"
+          }
+        },
+        "zh-HK" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "電話"
+          }
+        }
+      }
+    },
     "Photo" : {
       "comment" : "Receipt kind"
     },
+    "Pink" : {
+      "comment" : "Category color name",
+      "localizations" : {
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "粉红色"
+          }
+        },
+        "zh-HK" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "粉紅色"
+          }
+        }
+      }
+    },
+    "Preparing archive…" : {
+      "comment" : "Archive progress",
+      "localizations" : {
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "正在准备归档…"
+          }
+        },
+        "zh-HK" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "正在準備封存檔…"
+          }
+        }
+      }
+    },
+    "Preparing receipt…" : {
+      "comment" : "Receipt progress"
+    },
+    "Private iCloud sync is on for your Apple Account. Family sharing uses a shared iCloud zone." : {
+      "localizations" : {
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "你的 Apple 账户已启用私人 iCloud 同步。家庭共享使用共享的 iCloud 区域。"
+          }
+        },
+        "zh-HK" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "你的 Apple 帳户已啟用私人 iCloud 同步。家庭共享使用共享的 iCloud 區域。"
+          }
+        }
+      }
+    },
     "Private iCloud sync is on for your Apple ID. Family sharing uses a shared iCloud zone." : {
+      "extractionState" : "stale",
       "localizations" : {
         "zh-Hans" : {
           "stringUnit" : {
@@ -1845,6 +2858,23 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "已為你的 Apple ID 開啟私人 iCloud 同步。家庭共享使用共享的 iCloud 區域。"
+          }
+        }
+      }
+    },
+    "Purple" : {
+      "comment" : "Category color name",
+      "localizations" : {
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "紫色"
+          }
+        },
+        "zh-HK" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "紫色"
           }
         }
       }
@@ -1900,14 +2930,68 @@
         }
       }
     },
+    "Ready" : {
+      "comment" : "Sync status"
+    },
+    "Recalculate Stored Figures" : {
+      "comment" : "Currency action",
+      "localizations" : {
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "重新计算已存数字"
+          }
+        },
+        "zh-HK" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "重新計算已儲存數字"
+          }
+        }
+      }
+    },
+    "Recalculation uses the app's deterministic default exchange rates. The result is an approximation, not a historical market rate. Spend and charged amounts are never changed." : {
+      "comment" : "Currency confirmation explanation",
+      "localizations" : {
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "重新计算使用 App 的固定默认汇率。结果是近似值，并非历史市场汇率。消费金额和扣款金额绝不会更改。"
+          }
+        },
+        "zh-HK" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "重新計算會使用 App 的固定預設匯率。結果是約數，並非歷史市場匯率。消費金額和扣款金額絕不會更改。"
+          }
+        }
+      }
+    },
     "Receipt" : {
-      "comment" : "Default receipt filename"
+      "comment" : "Default receipt filename\nForm section"
     },
     "Receipt attached" : {
       "comment" : "VoiceOver"
     },
     "Receipts can be up to 10 MB." : {
       "comment" : "Receipt error"
+    },
+    "Recurring" : {
+      "comment" : "Category icon name",
+      "localizations" : {
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "定期"
+          }
+        },
+        "zh-HK" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "定期"
+          }
+        }
+      }
     },
     "Remove" : {
       "comment" : "Button"
@@ -1920,6 +3004,26 @@
     },
     "Remove Receipt" : {
       "comment" : "Button"
+    },
+    "Removing the shared ledger from this device…" : {
+      "comment" : "Sharing progress"
+    },
+    "Replace Matching" : {
+      "comment" : "Archive import mode",
+      "localizations" : {
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "替换匹配项"
+          }
+        },
+        "zh-HK" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "取代相符項目"
+          }
+        }
+      }
     },
     "Replace Photo" : {
       "comment" : "Button"
@@ -1964,6 +3068,12 @@
         }
       }
     },
+    "Retry" : {
+      "comment" : "Button\niCloud action"
+    },
+    "Safe retry information could not be stored, so the shared data was not removed." : {
+      "comment" : "Share error"
+    },
     "Save" : {
       "comment" : "Button",
       "localizations" : {
@@ -1980,6 +3090,15 @@
           }
         }
       }
+    },
+    "Save Private Copy and Stop" : {
+      "comment" : "Confirmation button"
+    },
+    "Saved stop-sharing state does not match the current iCloud account, ledger, or shared zone. No copy was created and no shared data was removed." : {
+      "comment" : "Share error"
+    },
+    "Saving a private copy, then stopping sharing…" : {
+      "comment" : "Sharing progress"
     },
     "Schema initialization needs a CloudKit-signed build." : {
       "extractionState" : "stale",
@@ -2049,8 +3168,28 @@
         }
       }
     },
+    "Selected" : {
+      "comment" : "Selection state",
+      "localizations" : {
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "已选择"
+          }
+        },
+        "zh-HK" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "已選取"
+          }
+        }
+      }
+    },
+    "Setting Up…" : {
+      "comment" : "Sync status"
+    },
     "Settings" : {
-      "comment" : "Screen title",
+      "comment" : "Screen title\nSidebar action\nToolbar\niOS settings app name",
       "localizations" : {
         "zh-Hans" : {
           "stringUnit" : {
@@ -2065,6 +3204,9 @@
           }
         }
       }
+    },
+    "Setup" : {
+      "comment" : "CloudKit event"
     },
     "Share Ledger" : {
       "comment" : "Button",
@@ -2083,8 +3225,14 @@
         }
       }
     },
+    "Sharing changes could not be saved: %@" : {
+      "comment" : "Share sheet error"
+    },
+    "Sharing stopped in iCloud, but the complete source ledger is no longer available to retain safely. No empty private copy was created. Keep this screen open and retry after iCloud finishes syncing." : {
+      "comment" : "Share error"
+    },
     "Shopping" : {
-      "comment" : "Default category",
+      "comment" : "Category icon name\nDefault category",
       "localizations" : {
         "zh-Hans" : {
           "stringUnit" : {
@@ -2104,6 +3252,7 @@
       "comment" : "Ledger selection"
     },
     "Sign in to iCloud in Settings to sync across your devices and share with family. Your personal ledger still works on this device." : {
+      "extractionState" : "stale",
       "localizations" : {
         "zh-Hans" : {
           "stringUnit" : {
@@ -2119,8 +3268,25 @@
         }
       }
     },
-    "Sign in to iCloud in System Settings, then return here to send an invite." : {
-
+    "Sign in to iCloud to unlock your data." : {
+      "comment" : "Persistence status"
+    },
+    "Sign in to iCloud with your Apple Account in %@, then return to HowMuch." : {
+      "comment" : "Platform-correct iCloud sign-in guidance",
+      "localizations" : {
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "请在%1$@中使用 Apple 账户登录 iCloud，然后返回 HowMuch。"
+          }
+        },
+        "zh-HK" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "請在%1$@中使用 Apple 帳户登入 iCloud，然後返回 HowMuch。"
+          }
+        }
+      }
     },
     "Signed In" : {
       "comment" : "iCloud account status",
@@ -2135,6 +3301,23 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "已登入"
+          }
+        }
+      }
+    },
+    "Slate" : {
+      "comment" : "Category color name",
+      "localizations" : {
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "灰蓝色"
+          }
+        },
+        "zh-HK" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "灰藍色"
           }
         }
       }
@@ -2156,7 +3339,24 @@
         }
       }
     },
+    "Spend tracking for individuals and families, using your Apple Account." : {
+      "localizations" : {
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "使用 Apple 账户，为个人和家庭追踪开支。"
+          }
+        },
+        "zh-HK" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "使用 Apple 帳户，為個人和家庭追蹤開支。"
+          }
+        }
+      }
+    },
     "Spend tracking for individuals and families, using your Apple ID." : {
+      "extractionState" : "stale",
       "localizations" : {
         "zh-Hans" : {
           "stringUnit" : {
@@ -2171,6 +3371,43 @@
           }
         }
       }
+    },
+    "Spending" : {
+      "comment" : "Insights chart series",
+      "localizations" : {
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "开支"
+          }
+        },
+        "zh-HK" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "開支"
+          }
+        }
+      }
+    },
+    "Spending by Category" : {
+      "comment" : "Insights chart title",
+      "localizations" : {
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "按类别查看开支"
+          }
+        },
+        "zh-HK" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "按類別查看開支"
+          }
+        }
+      }
+    },
+    "Spent %@" : {
+      "comment" : "VoiceOver spend amount"
     },
     "Stop Sharing" : {
       "comment" : "Button",
@@ -2189,6 +3426,9 @@
         }
       }
     },
+    "Stop sharing this family ledger?" : {
+      "comment" : "Confirmation title"
+    },
     "Subscriptions" : {
       "comment" : "Default category",
       "localizations" : {
@@ -2206,8 +3446,28 @@
         }
       }
     },
+    "Sync" : {
+      "comment" : "CloudKit event"
+    },
     "Sync Off" : {
       "comment" : "iCloud account status"
+    },
+    "System Settings" : {
+      "comment" : "macOS settings app name",
+      "localizations" : {
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "系统设置"
+          }
+        },
+        "zh-HK" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "系統設定"
+          }
+        }
+      }
     },
     "Tap a ledger to show it in Activity. Use the info button for settings and family sharing." : {
 
@@ -2229,6 +3489,74 @@
         }
       }
     },
+    "The archive contains a duplicate UUID: %@" : {
+      "comment" : "Archive error",
+      "localizations" : {
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "归档包含重复的 UUID：%1$@"
+          }
+        },
+        "zh-HK" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "封存檔包含重複的 UUID：%1$@"
+          }
+        }
+      }
+    },
+    "The archive contains a missing reference: %@" : {
+      "comment" : "Archive error",
+      "localizations" : {
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "归档包含缺失的引用：%1$@"
+          }
+        },
+        "zh-HK" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "封存檔包含缺少的參照：%1$@"
+          }
+        }
+      }
+    },
+    "The archive contains an invalid value: %@" : {
+      "comment" : "Archive error",
+      "localizations" : {
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "归档包含无效值：%1$@"
+          }
+        },
+        "zh-HK" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "封存檔包含無效值：%1$@"
+          }
+        }
+      }
+    },
+    "The archive contains an unsafe path: %@" : {
+      "comment" : "Archive error",
+      "localizations" : {
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "归档包含不安全的路径：%1$@"
+          }
+        },
+        "zh-HK" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "封存檔包含不安全的路徑：%1$@"
+          }
+        }
+      }
+    },
     "The billing currency is what this card or wallet charges. Dual-currency spends use it as the charged amount." : {
       "localizations" : {
         "zh-Hans" : {
@@ -2245,8 +3573,108 @@
         }
       }
     },
+    "The data store could not be loaded." : {
+
+    },
+    "The destination ledger is not available in a persistent store." : {
+
+    },
+    "The expense could not be saved: %@" : {
+
+    },
+    "The expense move could not be recorded safely. No data was moved." : {
+
+    },
+    "The iCloud account check timed out." : {
+      "comment" : "iCloud status"
+    },
+    "The iCloud account could not be determined." : {
+      "comment" : "iCloud status"
+    },
+    "The iCloud account identity is unavailable." : {
+      "comment" : "iCloud status"
+    },
+    "The iCloud account status is unknown." : {
+      "comment" : "iCloud status"
+    },
+    "The iCloud share could not be found." : {
+      "comment" : "Share error"
+    },
+    "The iCloud share could not be loaded: %@" : {
+      "comment" : "Share error"
+    },
+    "The invitation could not be accepted: %@ (%@ %lld)" : {
+      "comment" : "Share acceptance error",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "new",
+            "value" : "The invitation could not be accepted: %1$@ (%2$@ %3$lld)"
+          }
+        }
+      }
+    },
+    "The ledger's persistent store is unavailable." : {
+      "comment" : "Share error"
+    },
+    "The previous account's data stores could not be closed. No other account was opened. Quit and relaunch the app before trying again." : {
+      "comment" : "Persistent store unmount error"
+    },
+    "The previously retained private copy could not be verified. No additional copy was created and no shared data was removed." : {
+      "comment" : "Share error"
+    },
+    "The private data store did not load." : {
+
+    },
+    "The private data store is unavailable, so no retained copy was created." : {
+      "comment" : "Share error"
+    },
+    "The private data store is unavailable." : {
+      "comment" : "Archive error",
+      "localizations" : {
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "私有数据存储不可用。"
+          }
+        },
+        "zh-HK" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "私人資料儲存區無法使用。"
+          }
+        }
+      }
+    },
+    "The scoped iCloud account is not loaded." : {
+
+    },
+    "The selected category does not belong to the destination ledger." : {
+
+    },
     "The selected file is empty." : {
       "comment" : "Receipt error"
+    },
+    "The selected ledger, category, and payment method are not in the same shared data zone." : {
+
+    },
+    "The selected payment method does not belong to the destination ledger." : {
+
+    },
+    "The shared iCloud data could not be removed. Retry to leave the family. %@" : {
+      "comment" : "Share error"
+    },
+    "The shared iCloud zone could not be verified. The retained copy was not duplicated and sharing was not changed." : {
+      "comment" : "Share error"
+    },
+    "The system share belongs to a different iCloud account." : {
+
+    },
+    "This build is not configured for CloudKit." : {
+      "comment" : "Persistence status\niCloud status"
+    },
+    "This build keeps data on this device. Choose a Team in Xcode and enable CloudKit to turn on iCloud sync." : {
+
     },
     "This build keeps data on this Mac. Choose a Team in Xcode and enable CloudKit to turn on iCloud sync." : {
       "localizations" : {
@@ -2266,6 +3694,38 @@
     },
     "This cannot be undone." : {
 
+    },
+    "This category does not belong to the selected ledger." : {
+      "comment" : "Persistence mutation error"
+    },
+    "This HowMuch archive is invalid: %@" : {
+      "comment" : "Archive error",
+      "localizations" : {
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "此 HowMuch 归档无效：%1$@"
+          }
+        },
+        "zh-HK" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "此 HowMuch 封存檔無效：%1$@"
+          }
+        }
+      }
+    },
+    "This invitation is waiting for iCloud sharing to become available." : {
+      "comment" : "Share acceptance error"
+    },
+    "This invitation is waiting for your iCloud data stores to finish loading. Retry when iCloud is available." : {
+      "comment" : "Share acceptance error"
+    },
+    "This ledger is no longer available." : {
+      "comment" : "Ledger access error\nShare error"
+    },
+    "This ledger is read only right now. You can still view Activity and Insights." : {
+      "comment" : "Shared ledger read-only explanation"
     },
     "This ledger reports in %@. Enter the equivalent total." : {
 
@@ -2304,6 +3764,18 @@
         }
       }
     },
+    "This payment method does not belong to the selected ledger." : {
+      "comment" : "Persistence mutation error"
+    },
+    "This shared ledger and its expenses will be removed from this device. You will not keep a local copy." : {
+      "comment" : "Confirmation message"
+    },
+    "This shared ledger's permission could not be verified. Try again after iCloud finishes syncing." : {
+      "comment" : "Shared ledger access error"
+    },
+    "This stop-sharing retry no longer matches the ledger." : {
+      "comment" : "Share error"
+    },
     "Time" : {
       "comment" : "Field"
     },
@@ -2324,8 +3796,28 @@
         }
       }
     },
+    "Total %@" : {
+      "comment" : "VoiceOver insights total"
+    },
     "Totals in %@." : {
-
+      "comment" : "Insights chart footer"
+    },
+    "Transit" : {
+      "comment" : "Category icon name",
+      "localizations" : {
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "公共交通"
+          }
+        },
+        "zh-HK" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "公共交通"
+          }
+        }
+      }
     },
     "Transport" : {
       "comment" : "Default category",
@@ -2345,7 +3837,7 @@
       }
     },
     "Travel" : {
-      "comment" : "Default category",
+      "comment" : "Category icon name\nDefault category",
       "localizations" : {
         "zh-Hans" : {
           "stringUnit" : {
@@ -2360,6 +3852,9 @@
           }
         }
       }
+    },
+    "Unavailable" : {
+      "comment" : "Sync status"
     },
     "Unknown" : {
       "comment" : "iCloud account status",
@@ -2399,7 +3894,7 @@
       "comment" : "Receipt error"
     },
     "Utilities" : {
-      "comment" : "Default category",
+      "comment" : "Category icon name\nDefault category",
       "localizations" : {
         "zh-Hans" : {
           "stringUnit" : {
@@ -2415,8 +3910,40 @@
         }
       }
     },
+    "UUID %@ already exists in shared data and cannot be imported privately." : {
+      "comment" : "Archive error",
+      "localizations" : {
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "UUID %1$@ 已存在于共享数据中，无法导入私有存储。"
+          }
+        },
+        "zh-HK" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "UUID %1$@ 已存在於共享資料中，無法輸入私人儲存區。"
+          }
+        }
+      }
+    },
+    "UUID %@ belongs to a different ledger and cannot be merged." : {
+      "comment" : "Archive error"
+    },
+    "Verify your iCloud account before retrying." : {
+      "comment" : "Persistence error"
+    },
+    "Verifying your iCloud account…" : {
+      "comment" : "Persistence status"
+    },
     "View receipt" : {
       "comment" : "Button"
+    },
+    "Wait for iCloud setup or import to finish before stopping or leaving this share. No data was copied or removed." : {
+      "comment" : "Share error"
+    },
+    "Wait for iCloud setup or import to finish before stopping or leaving. The complete source must be available first." : {
+      "comment" : "Stop sharing waiting explanation"
     },
     "WeChat" : {
       "comment" : "Payment method kind",
@@ -2476,6 +4003,7 @@
       }
     },
     "You" : {
+      "comment" : "Current sharing participant",
       "localizations" : {
         "zh-Hans" : {
           "stringUnit" : {
@@ -2490,6 +4018,24 @@
           }
         }
       }
+    },
+    "Your changes could not be saved: %@" : {
+      "comment" : "Persistence mutation error"
+    },
+    "Your data stays locked until the iCloud account is verified." : {
+
+    },
+    "Your iCloud account could not be verified. Sharing was not changed: %@" : {
+      "comment" : "Share error"
+    },
+    "Your private copy was saved, but safe retry information could not be stored. Retry before stopping sharing." : {
+      "comment" : "Share error"
+    },
+    "Your private copy was saved, but the shared iCloud data could not be removed. Retry to finish without creating another copy. %@" : {
+      "comment" : "Share error"
+    },
+    "Your sharing membership could not be verified. Wait for iCloud to finish syncing, then try again." : {
+      "comment" : "Share error"
     }
   },
   "version" : "1.1"

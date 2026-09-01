@@ -1,3 +1,4 @@
+import Accessibility
 import Charts
 import CoreData
 import SwiftUI
@@ -17,16 +18,37 @@ enum InsightsRange: String, CaseIterable, Identifiable {
         }
     }
 
-    func contains(_ date: Date, now: Date = Date(), calendar: Calendar = .current) -> Bool {
+    func dateInterval(now: Date = Date(), calendar: Calendar = .current) -> DateInterval? {
         switch self {
         case .month:
-            return calendar.isDate(date, equalTo: now, toGranularity: .month)
+            return calendar.dateInterval(of: .month, for: now)
         case .thirtyDays:
-            let start = calendar.date(byAdding: .day, value: -30, to: now) ?? now
-            return date >= start
+            let today = calendar.startOfDay(for: now)
+            guard let start = calendar.date(byAdding: .day, value: -29, to: today),
+                  let end = calendar.date(byAdding: .day, value: 1, to: today) else {
+                return nil
+            }
+            return DateInterval(start: start, end: end)
         case .all:
-            return true
+            return nil
         }
+    }
+
+    func contains(_ date: Date, now: Date = Date(), calendar: Calendar = .current) -> Bool {
+        guard let interval = dateInterval(now: now, calendar: calendar) else { return true }
+        return date >= interval.start && date < interval.end
+    }
+
+    func predicate(for ledger: Ledger, now: Date = Date(), calendar: Calendar = .current) -> NSPredicate {
+        guard let interval = dateInterval(now: now, calendar: calendar) else {
+            return NSPredicate(format: "ledger == %@", ledger)
+        }
+        return NSPredicate(
+            format: "ledger == %@ AND occurredAt >= %@ AND occurredAt < %@",
+            ledger,
+            interval.start as NSDate,
+            interval.end as NSDate
+        )
     }
 }
 
@@ -50,7 +72,7 @@ struct InsightsView: View {
         Group {
             if let ledger {
                 InsightsContent(ledger: ledger, range: $range)
-                    .id(ledger.objectID)
+                    .id("\(ledger.objectID.uriRepresentation().absoluteString)|\(range.rawValue)")
             } else {
                 ContentUnavailableView(
                     String(localized: "Insights", comment: "Screen title"),
@@ -71,67 +93,164 @@ struct InsightsView: View {
 
 private struct InsightsRangeControl: View {
     @Binding var range: InsightsRange
+    @Environment(\.dynamicTypeSize) private var dynamicTypeSize
 
     var body: some View {
-        HMGlassGroup(spacing: 8) {
-            HStack(spacing: 8) {
-                ForEach(InsightsRange.allCases) { item in
-                    Button {
-                        range = item
-                    } label: {
-                        Text(item.title)
-                            .lineLimit(1)
-                            .minimumScaleFactor(0.75)
-                            .frame(maxWidth: .infinity)
+        Group {
+            if dynamicTypeSize.isAccessibilitySize {
+                rangeMenu
+            } else {
+                ViewThatFits(in: .horizontal) {
+                    HMGlassGroup(spacing: 8) {
+                        HStack(spacing: 8) {
+                            rangeButtons
+                        }
                     }
-                    .hmGlassChoiceButton(isSelected: range == item)
-                    .accessibilityAddTraits(range == item ? .isSelected : [])
+                    rangeMenu
                 }
             }
         }
         .accessibilityElement(children: .contain)
         .accessibilityLabel(String(localized: "Range", comment: "Insights"))
+        .accessibilityIdentifier("insights.range")
+    }
+
+    @ViewBuilder
+    private var rangeButtons: some View {
+        ForEach(InsightsRange.allCases) { item in
+            Button {
+                range = item
+            } label: {
+                Text(item.title)
+                    .lineLimit(1)
+                    .fixedSize(horizontal: true, vertical: false)
+                    .frame(maxWidth: .infinity)
+            }
+            .hmGlassChoiceButton(isSelected: range == item)
+            .accessibilityAddTraits(range == item ? .isSelected : [])
+        }
+    }
+
+    private var rangeMenu: some View {
+        Picker(String(localized: "Range", comment: "Insights"), selection: $range) {
+            ForEach(InsightsRange.allCases) { item in
+                Text(item.title).tag(item)
+            }
+        }
+        .pickerStyle(.menu)
+        .frame(maxWidth: .infinity, alignment: .leading)
     }
 }
 
-private struct InsightsSnapshot {
+struct InsightsExpenseInput: Equatable, Sendable {
+    let categoryName: String
+    let categorySymbol: String
+    let categoryColorHex: String
+    let spendAmount: Decimal
+    let spendCurrency: String
+    let chargedAmount: Decimal
+    let chargedCurrency: String
+    let storedReportingAmount: Decimal
+    let storedReportingCurrency: String
+
+    init(expense: Expense) {
+        categoryName = expense.category?.wrappedName ?? String(localized: "Other", comment: "Default category")
+        categorySymbol = expense.category?.wrappedSymbolName ?? "tag"
+        categoryColorHex = expense.category?.wrappedColorHex ?? "64748B"
+        spendAmount = expense.wrappedSpendAmount
+        spendCurrency = expense.wrappedSpendCurrency
+        chargedAmount = expense.wrappedChargedAmount
+        chargedCurrency = expense.wrappedChargedCurrency
+        storedReportingAmount = expense.wrappedReportingAmount
+        storedReportingCurrency = expense.wrappedReportingCurrency
+    }
+
+    init(
+        categoryName: String,
+        categorySymbol: String = "tag",
+        categoryColorHex: String = "64748B",
+        spendAmount: Decimal,
+        spendCurrency: String,
+        chargedAmount: Decimal,
+        chargedCurrency: String,
+        storedReportingAmount: Decimal,
+        storedReportingCurrency: String
+    ) {
+        self.categoryName = categoryName
+        self.categorySymbol = categorySymbol
+        self.categoryColorHex = categoryColorHex
+        self.spendAmount = spendAmount
+        self.spendCurrency = spendCurrency
+        self.chargedAmount = chargedAmount
+        self.chargedCurrency = chargedCurrency
+        self.storedReportingAmount = storedReportingAmount
+        self.storedReportingCurrency = storedReportingCurrency
+    }
+}
+
+struct InsightsCategoryTotal: Equatable, Sendable {
+    let name: String
+    let symbol: String
+    let colorHex: String
+    let total: Decimal
+}
+
+struct InsightsCurrencyTotal: Equatable, Sendable {
+    let code: String
+    let total: Decimal
+}
+
+struct InsightsSnapshot: Equatable, Sendable {
     let reportingCode: String
     let isEmpty: Bool
     let reportingTotal: Decimal
-    let byCategory: [(name: String, symbol: String, color: Color, total: Decimal)]
-    let bySpend: [(code: String, total: Decimal)]
-    let byCharged: [(code: String, total: Decimal)]
+    let byCategory: [InsightsCategoryTotal]
+    let bySpend: [InsightsCurrencyTotal]
+    let byCharged: [InsightsCurrencyTotal]
 
-    init(expenses: FetchedResults<Expense>, range: InsightsRange, reportingCode: String) {
+    init(expenses: [InsightsExpenseInput], reportingCode: String) {
         self.reportingCode = reportingCode
-        let now = Date()
-        let calendar = Calendar.current
-        let filtered = expenses.filter { range.contains($0.wrappedOccurredAt, now: now, calendar: calendar) }
-        isEmpty = filtered.isEmpty
+        isEmpty = expenses.isEmpty
 
         var total: Decimal = 0
-        var categories: [String: (symbol: String, color: Color, total: Decimal)] = [:]
+        var categories: [String: (symbol: String, colorHex: String, total: Decimal)] = [:]
         var spend: [String: Decimal] = [:]
         var charged: [String: Decimal] = [:]
-        for expense in filtered {
-            let converted = expense.insightsReportingAmount(in: reportingCode)
+        for expense in expenses {
+            let converted = MoneyMath.insightsReportingAmount(
+                spend: expense.spendAmount,
+                spendCurrency: expense.spendCurrency,
+                charged: expense.chargedAmount,
+                chargedCurrency: expense.chargedCurrency,
+                reportingCurrency: reportingCode,
+                storedReporting: expense.storedReportingAmount,
+                storedReportingCurrency: expense.storedReportingCurrency
+            )
             total += converted
-            let name = expense.category?.wrappedName ?? String(localized: "Other", comment: "Default category")
-            let current = categories[name]
-            categories[name] = (
-                expense.category?.wrappedSymbolName ?? current?.symbol ?? "tag",
-                expense.category?.color ?? current?.color ?? .secondary,
+            let current = categories[expense.categoryName]
+            categories[expense.categoryName] = (
+                expense.categorySymbol,
+                expense.categoryColorHex,
                 (current?.total ?? 0) + converted
             )
-            spend[expense.wrappedSpendCurrency, default: 0] += expense.wrappedSpendAmount
-            charged[expense.wrappedChargedCurrency, default: 0] += expense.wrappedChargedAmount
+            spend[expense.spendCurrency, default: 0] += expense.spendAmount
+            charged[expense.chargedCurrency, default: 0] += expense.chargedAmount
         }
         reportingTotal = total
         byCategory = categories
-            .map { (name: $0.key, symbol: $0.value.symbol, color: $0.value.color, total: $0.value.total) }
+            .map {
+                InsightsCategoryTotal(
+                    name: $0.key,
+                    symbol: $0.value.symbol,
+                    colorHex: $0.value.colorHex,
+                    total: $0.value.total
+                )
+            }
             .sorted { $0.total > $1.total }
-        bySpend = spend.map { (code: $0.key, total: $0.value) }.sorted { $0.code < $1.code }
-        byCharged = charged.map { (code: $0.key, total: $0.value) }.sorted { $0.code < $1.code }
+        bySpend = spend.map { InsightsCurrencyTotal(code: $0.key, total: $0.value) }
+            .sorted { $0.code < $1.code }
+        byCharged = charged.map { InsightsCurrencyTotal(code: $0.key, total: $0.value) }
+            .sorted { $0.code < $1.code }
     }
 }
 
@@ -139,20 +258,21 @@ private struct InsightsContent: View {
     @ObservedObject var ledger: Ledger
     @Binding var range: InsightsRange
     @FetchRequest private var expenses: FetchedResults<Expense>
+    @ScaledMetric(relativeTo: .body) private var chartRowHeight = 36
 
     init(ledger: Ledger, range: Binding<InsightsRange>) {
         self.ledger = ledger
         _range = range
         _expenses = FetchRequest(
             sortDescriptors: [NSSortDescriptor(keyPath: \Expense.occurredAt, ascending: false)],
-            predicate: NSPredicate(format: "ledger == %@", ledger)
+            predicate: range.wrappedValue.predicate(for: ledger),
+            animation: .default
         )
     }
 
     var body: some View {
         let snapshot = InsightsSnapshot(
-            expenses: expenses,
-            range: range,
+            expenses: expenses.map(InsightsExpenseInput.init),
             reportingCode: ledger.wrappedReportingCurrency
         )
         Form {
@@ -168,7 +288,11 @@ private struct InsightsContent: View {
                     Text(CurrencyCatalog.format(snapshot.reportingTotal, code: snapshot.reportingCode))
                         .font(.largeTitle.bold().monospacedDigit())
                         .accessibilityAddTraits(.isHeader)
-                    Text("All currencies, in \(snapshot.reportingCode). Default rates when an expense was not entered in this currency.")
+                        .accessibilityLabel(String(
+                            localized: "Total \(CurrencyCatalog.format(snapshot.reportingTotal, code: snapshot.reportingCode))",
+                            comment: "VoiceOver insights total"
+                        ))
+                    Text(String(localized: "All currencies, in \(snapshot.reportingCode). Default rates are used when an expense was not entered in this currency."))
                         .font(.caption)
                         .foregroundStyle(.secondary)
                         .hmWrappingText()
@@ -184,19 +308,12 @@ private struct InsightsContent: View {
                 )
             } else {
                 Section {
-                    Chart(snapshot.byCategory, id: \.name) { item in
-                        BarMark(
-                            x: .value(String(localized: "Total", comment: "Chart axis"), item.total),
-                            y: .value(String(localized: "Category", comment: "Chart axis"), item.name)
-                        )
-                        .foregroundStyle(item.color)
-                    }
-                    .frame(height: max(160, CGFloat(snapshot.byCategory.count) * 36))
-                    .accessibilityLabel(String(localized: "By Category", comment: "Insights section"))
+                    InsightsCategoryChart(snapshot: snapshot)
+                        .frame(height: max(chartRowHeight * 4.5, CGFloat(snapshot.byCategory.count) * chartRowHeight))
                 } header: {
-                    Text("By Category")
+                    Text(String(localized: "By Category", comment: "Insights section"))
                 } footer: {
-                    Text("Totals in \(snapshot.reportingCode).")
+                    Text(String(localized: "Totals in \(snapshot.reportingCode).", comment: "Insights chart footer"))
                         .hmWrappingFooter()
                 }
 
@@ -224,7 +341,7 @@ private struct InsightsContent: View {
     private func totalsSection(
         title: String,
         subtitle: String,
-        rows: [(code: String, total: Decimal)],
+        rows: [InsightsCurrencyTotal],
         reportingCode: String
     ) -> some View {
         Section {
@@ -233,12 +350,20 @@ private struct InsightsContent: View {
                     VStack(alignment: .trailing, spacing: 2) {
                         Text(CurrencyCatalog.format(row.total, code: row.code))
                             .monospacedDigit()
+                            .accessibilityLabel(String(
+                                localized: "Amount \(CurrencyCatalog.format(row.total, code: row.code))",
+                                comment: "VoiceOver currency amount"
+                            ))
                         if let converted = DefaultFXRates.convert(row.total, from: row.code, to: reportingCode),
                            !MoneyMath.currenciesMatch(row.code, reportingCode) {
                             Text("≈ \(CurrencyCatalog.format(converted, code: reportingCode))")
                                 .font(.caption)
                                 .foregroundStyle(.secondary)
                                 .monospacedDigit()
+                                .accessibilityLabel(String(
+                                    localized: "Approximately \(CurrencyCatalog.format(converted, code: reportingCode))",
+                                    comment: "VoiceOver converted amount"
+                                ))
                         }
                     }
                 }
@@ -253,6 +378,62 @@ private struct InsightsContent: View {
     }
 }
 
+private struct InsightsCategoryChart: View, AXChartDescriptorRepresentable {
+    let snapshot: InsightsSnapshot
+
+    var body: some View {
+        Chart(snapshot.byCategory, id: \.name) { item in
+            BarMark(
+                x: .value(String(localized: "Total", comment: "Chart axis"), item.total),
+                y: .value(String(localized: "Category", comment: "Chart axis"), item.name)
+            )
+            .foregroundStyle(Color(hex: item.colorHex))
+            .accessibilityLabel(item.name)
+            .accessibilityValue(CurrencyCatalog.format(item.total, code: snapshot.reportingCode))
+        }
+        .accessibilityChartDescriptor(self)
+        .accessibilityLabel(String(localized: "By Category", comment: "Insights section"))
+    }
+
+    func makeChartDescriptor() -> AXChartDescriptor {
+        let maximum = snapshot.byCategory
+            .map { NSDecimalNumber(decimal: $0.total).doubleValue }
+            .max() ?? 0
+        let valueAxis = AXNumericDataAxisDescriptor(
+            title: String(localized: "Total", comment: "Chart axis"),
+            range: 0...max(maximum, 1),
+            gridlinePositions: [],
+            valueDescriptionProvider: { value in
+                CurrencyCatalog.format(Decimal(value), code: snapshot.reportingCode)
+            }
+        )
+        let categoryAxis = AXCategoricalDataAxisDescriptor(
+            title: String(localized: "Category", comment: "Chart axis"),
+            categoryOrder: snapshot.byCategory.map(\.name)
+        )
+        let points = snapshot.byCategory.map { item in
+            AXDataPoint(
+                x: item.name,
+                y: NSDecimalNumber(decimal: item.total).doubleValue,
+                additionalValues: []
+            )
+        }
+        let series = AXDataSeriesDescriptor(
+            name: String(localized: "Spending", comment: "Insights chart series"),
+            isContinuous: false,
+            dataPoints: points
+        )
+        return AXChartDescriptor(
+            title: String(localized: "Spending by Category", comment: "Insights chart title"),
+            summary: String(localized: "Category totals in \(snapshot.reportingCode).", comment: "Insights chart summary"),
+            xAxis: categoryAxis,
+            yAxis: valueAxis,
+            additionalAxes: [],
+            series: [series]
+        )
+    }
+}
+
 #if DEBUG
 #Preview("Insights") {
     HowMuchPreview.wrap(
@@ -260,6 +441,16 @@ private struct InsightsContent: View {
             InsightsView()
         }
     )
+    .frame(width: 400, height: 560)
+}
+
+#Preview("Insights Accessibility Size") {
+    HowMuchPreview.wrap(
+        NavigationStack {
+            InsightsView()
+        }
+    )
+    .environment(\.dynamicTypeSize, .accessibility3)
     .frame(width: 400, height: 560)
 }
 #endif

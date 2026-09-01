@@ -14,11 +14,19 @@
 			remoteGlobalIDString = A10000000000000000000040;
 			remoteInfo = HowMuch;
 		};
+		A10000000000000000000062 /* PBXContainerItemProxy */ = {
+			isa = PBXContainerItemProxy;
+			containerPortal = A10000000000000000000000 /* Project object */;
+			proxyType = 1;
+			remoteGlobalIDString = A10000000000000000000040;
+			remoteInfo = HowMuch;
+		};
 /* End PBXContainerItemProxy section */
 
 /* Begin PBXFileReference section */
 		A10000000000000000000010 /* HowMuch.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = HowMuch.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		A10000000000000000000011 /* HowMuchTests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = HowMuchTests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
+		A10000000000000000000012 /* HowMuchUITests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = HowMuchUITests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
 /* End PBXFileReference section */
 
 /* Begin PBXFileSystemSynchronizedBuildFileExceptionSet section */
@@ -45,6 +53,11 @@
 			path = HowMuchTests;
 			sourceTree = "<group>";
 		};
+		A10000000000000000000003 /* HowMuchUITests */ = {
+			isa = PBXFileSystemSynchronizedRootGroup;
+			path = HowMuchUITests;
+			sourceTree = "<group>";
+		};
 /* End PBXFileSystemSynchronizedRootGroup section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -62,6 +75,13 @@
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
+		A10000000000000000000022 /* Frameworks */ = {
+			isa = PBXFrameworksBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
 /* End PBXFrameworksBuildPhase section */
 
 /* Begin PBXGroup section */
@@ -70,6 +90,7 @@
 			children = (
 				A10000000000000000000001 /* HowMuch */,
 				A10000000000000000000002 /* HowMuchTests */,
+				A10000000000000000000003 /* HowMuchUITests */,
 				A10000000000000000000031 /* Products */,
 			);
 			sourceTree = "<group>";
@@ -79,6 +100,7 @@
 			children = (
 				A10000000000000000000010 /* HowMuch.app */,
 				A10000000000000000000011 /* HowMuchTests.xctest */,
+				A10000000000000000000012 /* HowMuchUITests.xctest */,
 			);
 			name = Products;
 			sourceTree = "<group>";
@@ -131,6 +153,29 @@
 			productReference = A10000000000000000000011 /* HowMuchTests.xctest */;
 			productType = "com.apple.product-type.bundle.unit-test";
 		};
+		A10000000000000000000042 /* HowMuchUITests */ = {
+			isa = PBXNativeTarget;
+			buildConfigurationList = A10000000000000000000073 /* Build configuration list for PBXNativeTarget "HowMuchUITests" */;
+			buildPhases = (
+				A10000000000000000000054 /* Sources */,
+				A10000000000000000000022 /* Frameworks */,
+				A10000000000000000000055 /* Resources */,
+			);
+			buildRules = (
+			);
+			dependencies = (
+				A10000000000000000000063 /* PBXTargetDependency */,
+			);
+			fileSystemSynchronizedGroups = (
+				A10000000000000000000003 /* HowMuchUITests */,
+			);
+			name = HowMuchUITests;
+			packageProductDependencies = (
+			);
+			productName = HowMuchUITests;
+			productReference = A10000000000000000000012 /* HowMuchUITests.xctest */;
+			productType = "com.apple.product-type.bundle.ui-testing";
+		};
 /* End PBXNativeTarget section */
 
 /* Begin PBXProject section */
@@ -145,6 +190,10 @@
 						CreatedOnToolsVersion = 26.6;
 					};
 					A10000000000000000000041 = {
+						CreatedOnToolsVersion = 26.6;
+						TestTargetID = A10000000000000000000040;
+					};
+					A10000000000000000000042 = {
 						CreatedOnToolsVersion = 26.6;
 						TestTargetID = A10000000000000000000040;
 					};
@@ -168,6 +217,7 @@
 			targets = (
 				A10000000000000000000040 /* HowMuch */,
 				A10000000000000000000041 /* HowMuchTests */,
+				A10000000000000000000042 /* HowMuchUITests */,
 			);
 		};
 /* End PBXProject section */
@@ -181,6 +231,13 @@
 			runOnlyForDeploymentPostprocessing = 0;
 		};
 		A10000000000000000000053 /* Resources */ = {
+			isa = PBXResourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		A10000000000000000000055 /* Resources */ = {
 			isa = PBXResourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
@@ -204,6 +261,13 @@
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
+		A10000000000000000000054 /* Sources */ = {
+			isa = PBXSourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
 /* End PBXSourcesBuildPhase section */
 
 /* Begin PBXTargetDependency section */
@@ -211,6 +275,11 @@
 			isa = PBXTargetDependency;
 			target = A10000000000000000000040 /* HowMuch */;
 			targetProxy = A10000000000000000000061 /* PBXContainerItemProxy */;
+		};
+		A10000000000000000000063 /* PBXTargetDependency */ = {
+			isa = PBXTargetDependency;
+			target = A10000000000000000000040 /* HowMuch */;
+			targetProxy = A10000000000000000000062 /* PBXContainerItemProxy */;
 		};
 /* End PBXTargetDependency section */
 
@@ -394,7 +463,7 @@
 			buildSettings = {
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
 				ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME = AccentColor;
-				"CODE_SIGN_ENTITLEMENTS[sdk=iphoneos*]" = "HowMuch/HowMuch-iOS.entitlements";
+				"CODE_SIGN_ENTITLEMENTS[sdk=iphoneos*]" = "HowMuch/HowMuch-iOS-Release.entitlements";
 				"CODE_SIGN_ENTITLEMENTS[sdk=iphonesimulator*]" = "HowMuch/HowMuch-iOS.entitlements";
 				"CODE_SIGN_ENTITLEMENTS[sdk=macosx*]" = "HowMuch/HowMuch-macOS.entitlements";
 				CODE_SIGN_STYLE = Automatic;
@@ -480,6 +549,50 @@
 			};
 			name = Release;
 		};
+		A10000000000000000000086 /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				CODE_SIGN_STYLE = Automatic;
+				CURRENT_PROJECT_VERSION = 1;
+				GENERATE_INFOPLIST_FILE = YES;
+				IPHONEOS_DEPLOYMENT_TARGET = 18.0;
+				MACOSX_DEPLOYMENT_TARGET = 15.0;
+				MARKETING_VERSION = 1.0;
+				PRODUCT_BUNDLE_IDENTIFIER = com.howmuch.app.uitests;
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				SDKROOT = auto;
+				SUPPORTED_PLATFORMS = "iphoneos iphonesimulator macosx";
+				SWIFT_APPROACHABLE_CONCURRENCY = YES;
+				SWIFT_EMIT_LOC_STRINGS = NO;
+				SWIFT_UPCOMING_FEATURE_MEMBER_IMPORT_VISIBILITY = YES;
+				SWIFT_VERSION = 6.0;
+				TARGETED_DEVICE_FAMILY = "1,2";
+				TEST_TARGET_NAME = HowMuch;
+			};
+			name = Debug;
+		};
+		A10000000000000000000087 /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				CODE_SIGN_STYLE = Automatic;
+				CURRENT_PROJECT_VERSION = 1;
+				GENERATE_INFOPLIST_FILE = YES;
+				IPHONEOS_DEPLOYMENT_TARGET = 18.0;
+				MACOSX_DEPLOYMENT_TARGET = 15.0;
+				MARKETING_VERSION = 1.0;
+				PRODUCT_BUNDLE_IDENTIFIER = com.howmuch.app.uitests;
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				SDKROOT = auto;
+				SUPPORTED_PLATFORMS = "iphoneos iphonesimulator macosx";
+				SWIFT_APPROACHABLE_CONCURRENCY = YES;
+				SWIFT_EMIT_LOC_STRINGS = NO;
+				SWIFT_UPCOMING_FEATURE_MEMBER_IMPORT_VISIBILITY = YES;
+				SWIFT_VERSION = 6.0;
+				TARGETED_DEVICE_FAMILY = "1,2";
+				TEST_TARGET_NAME = HowMuch;
+			};
+			name = Release;
+		};
 /* End XCBuildConfiguration section */
 
 /* Begin XCConfigurationList section */
@@ -506,6 +619,15 @@
 			buildConfigurations = (
 				A10000000000000000000080 /* Debug */,
 				A10000000000000000000081 /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
+		};
+		A10000000000000000000073 /* Build configuration list for PBXNativeTarget "HowMuchUITests" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				A10000000000000000000086 /* Debug */,
+				A10000000000000000000087 /* Release */,
 			);
 			defaultConfigurationIsVisible = 0;
 			defaultConfigurationName = Release;

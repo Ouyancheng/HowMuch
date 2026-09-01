@@ -1,6 +1,31 @@
 import Foundation
 
 enum CurrencyCatalog: Sendable {
+    private final class FormatterCache: @unchecked Sendable {
+        private let lock = NSLock()
+        private var formatters: [String: NumberFormatter] = [:]
+
+        func withFormatter<T>(for code: String, _ body: (NumberFormatter) -> T) -> T {
+            lock.lock()
+            defer { lock.unlock() }
+            let normalizedCode = code.uppercased()
+            let formatter: NumberFormatter
+            if let cached = formatters[normalizedCode] {
+                formatter = cached
+            } else {
+                let created = NumberFormatter()
+                created.locale = .current
+                created.numberStyle = .currency
+                created.currencyCode = normalizedCode
+                formatters[normalizedCode] = created
+                formatter = created
+            }
+            return body(formatter)
+        }
+    }
+
+    private static let formatterCache = FormatterCache()
+
     static let featured: [String] = [
         "HKD", "CNY", "USD", "EUR", "GBP", "JPY", "SGD", "TWD", "AUD", "CAD", "KRW", "MOP", "THB", "CHF", "NZD"
     ]
@@ -27,20 +52,14 @@ enum CurrencyCatalog: Sendable {
         return name == code ? code : "\(code) — \(name)"
     }
 
-    static func formatter(for code: String) -> NumberFormatter {
-        let formatter = NumberFormatter()
-        formatter.numberStyle = .currency
-        formatter.currencyCode = code
-        formatter.maximumFractionDigits = 2
-        formatter.minimumFractionDigits = 2
-        if code == "JPY" || code == "KRW" {
-            formatter.maximumFractionDigits = 0
-            formatter.minimumFractionDigits = 0
-        }
-        return formatter
+    static func fractionDigits(for code: String) -> Int {
+        formatterCache.withFormatter(for: code) { $0.maximumFractionDigits }
     }
 
     static func format(_ amount: Decimal, code: String) -> String {
-        formatter(for: code).string(from: amount as NSDecimalNumber) ?? "\(amount) \(code)"
+        let normalizedCode = code.uppercased()
+        return formatterCache.withFormatter(for: normalizedCode) {
+            $0.string(from: amount as NSDecimalNumber) ?? "\(amount) \(normalizedCode)"
+        }
     }
 }

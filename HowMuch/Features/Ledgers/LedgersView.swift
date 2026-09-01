@@ -36,16 +36,16 @@ struct LedgersView: View {
                     Label(String(localized: "New Family Ledger", comment: "List action"), systemImage: "plus")
                 }
             } header: {
-                Text("Family")
+                Text(String(localized: "Family", comment: "Section"))
             } footer: {
-                Text("Family ledgers are shared with people you invite. Personal ledgers stay private.")
+                Text(String(localized: "Family ledgers are shared with people you invite. Personal ledgers stay private."))
                     .hmWrappingFooter()
             }
         }
         .navigationTitle(String(localized: "Ledgers", comment: "Screen title"))
         #if os(iOS)
         .safeAreaInset(edge: .bottom) {
-            Text("Tap a ledger to show it in Activity. Use the info button for settings and family sharing.")
+            Text(String(localized: "Tap a ledger to show it in Activity. Use the info button for settings and family sharing."))
                 .font(.footnote)
                 .foregroundStyle(.secondary)
                 .multilineTextAlignment(.center)
@@ -143,25 +143,35 @@ struct LedgerDetailView: View {
     @EnvironmentObject private var persistence: PersistenceController
     @State private var name: String = ""
     @State private var reportingCurrency: String = "USD"
+    @State private var mutationError: String?
+    @State private var presentsCurrencyConfirmation = false
+    @State private var dismissAfterCurrencyConfirmation = false
+
+    private var isWritable: Bool {
+        persistence.canWrite(ledger)
+    }
 
     var body: some View {
         Form {
             Section {
                 TextField(String(localized: "Name", comment: "Field"), text: $name)
+                    .disabled(!isWritable)
                 Picker(String(localized: "Reporting Currency", comment: "Field"), selection: $reportingCurrency) {
                     ForEach(CurrencyCatalog.featured, id: \.self) { code in
                         Text(CurrencyCatalog.displayName(for: code)).tag(code)
                     }
                 }
+                .accessibilityIdentifier("ledger.reporting-currency")
+                .disabled(!isWritable)
                 LabeledContent(String(localized: "Kind", comment: "Field"), value: ledger.ledgerKind.title)
             } header: {
-                Text("Ledger")
+                Text(String(localized: "Ledger", comment: "Section"))
             } footer: {
                 if ledger.isPersonal {
-                    Text("Personal ledgers stay private and sync across your own devices with iCloud.")
+                    Text(String(localized: "Personal ledgers stay private and sync across your own devices with iCloud."))
                         .hmWrappingFooter()
                 } else {
-                    Text("Family ledgers are shared with people you invite. Personal ledgers stay private.")
+                    Text(String(localized: "Family ledgers are shared with people you invite. Personal ledgers stay private."))
                         .hmWrappingFooter()
                 }
             }
@@ -187,6 +197,21 @@ struct LedgerDetailView: View {
                     }
                 }
             }
+
+            if !isWritable {
+                Section {
+                    Text(LedgerAccess.readOnlyExplanation)
+                        .hmWrappingFooter()
+                }
+            }
+
+            if let mutationError {
+                Section {
+                    Text(mutationError)
+                        .foregroundStyle(.red)
+                        .hmWrappingText()
+                }
+            }
         }
         .formStyle(.grouped)
         #if os(macOS)
@@ -200,8 +225,13 @@ struct LedgerDetailView: View {
             if showsCloseButton {
                 ToolbarItem(placement: .confirmationAction) {
                     Button(String(localized: "Done", comment: "Button")) {
-                        persist()
-                        dismiss()
+                        persistName()
+                        if reportingCurrency != ledger.wrappedReportingCurrency {
+                            dismissAfterCurrencyConfirmation = true
+                            presentsCurrencyConfirmation = true
+                        } else {
+                            dismiss()
+                        }
                     }
                     .keyboardShortcut(.defaultAction)
                 }
@@ -211,17 +241,83 @@ struct LedgerDetailView: View {
             name = ledger.wrappedName
             reportingCurrency = ledger.wrappedReportingCurrency
         }
-        .onDisappear(perform: persist)
-        .onChange(of: name) { _, _ in persist() }
-        .onChange(of: reportingCurrency) { _, _ in persist() }
+        .onDisappear(perform: persistName)
+        .task(id: name) {
+            do {
+                try await Task.sleep(for: .milliseconds(400))
+                persistName()
+            } catch {
+                // Keystrokes cancel the prior pending save.
+            }
+        }
+        .onChange(of: reportingCurrency) { _, newValue in
+            if newValue != ledger.wrappedReportingCurrency {
+                dismissAfterCurrencyConfirmation = false
+                presentsCurrencyConfirmation = true
+            }
+        }
+        .onChange(of: ledger.name) { oldValue, newValue in
+            if name == (oldValue ?? "") {
+                name = newValue ?? ""
+            }
+        }
+        .onChange(of: ledger.reportingCurrency) { oldValue, newValue in
+            if reportingCurrency == (oldValue ?? CurrencyCatalog.localeCurrency) {
+                reportingCurrency = newValue ?? CurrencyCatalog.localeCurrency
+            }
+        }
+        .confirmationDialog(
+            String(localized: "Change Reporting Currency?", comment: "Currency confirmation title"),
+            isPresented: $presentsCurrencyConfirmation,
+            titleVisibility: .visible
+        ) {
+            Button(String(localized: "Keep Historical Values", comment: "Currency action")) {
+                confirmCurrencyChange(mode: .keepHistoricalValues)
+            }
+            Button(String(localized: "Recalculate Stored Figures", comment: "Currency action")) {
+                confirmCurrencyChange(mode: .recalculateStoredFigures)
+            }
+            Button(String(localized: "Cancel", comment: "Button"), role: .cancel) {
+                reportingCurrency = ledger.wrappedReportingCurrency
+                dismissAfterCurrencyConfirmation = false
+            }
+        } message: {
+            Text(String(localized: "Recalculation uses the app's deterministic default exchange rates. The result is an approximation, not a historical market rate. Spend and charged amounts are never changed.", comment: "Currency confirmation explanation"))
+        }
     }
 
-    private func persist() {
+    private func persistName() {
+        guard isWritable else { return }
         let trimmed = name.trimmingCharacters(in: .whitespacesAndNewlines)
-        ledger.name = trimmed.isEmpty ? ledger.wrappedName : trimmed
-        ledger.reportingCurrency = reportingCurrency
-        ledger.updatedAt = Date()
-        persistence.save()
+        guard !trimmed.isEmpty, trimmed != ledger.wrappedName else { return }
+        do {
+            try persistence.updateLedger(
+                ledger,
+                name: trimmed,
+                reportingCurrency: ledger.wrappedReportingCurrency
+            )
+            mutationError = nil
+        } catch {
+            mutationError = error.localizedDescription
+        }
+    }
+
+    private func confirmCurrencyChange(mode: ReportingCurrencyUpdateMode) {
+        guard isWritable, reportingCurrency != ledger.wrappedReportingCurrency else { return }
+        do {
+            try persistence.updateReportingCurrency(
+                for: ledger,
+                to: reportingCurrency,
+                mode: mode
+            )
+            mutationError = nil
+            if dismissAfterCurrencyConfirmation {
+                dismiss()
+            }
+            dismissAfterCurrencyConfirmation = false
+        } catch {
+            mutationError = error.localizedDescription
+        }
     }
 }
 

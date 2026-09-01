@@ -1,5 +1,6 @@
 import CoreData
 import SwiftUI
+import UniformTypeIdentifiers
 #if os(iOS)
 import PhotosUI
 import QuickLook
@@ -39,6 +40,9 @@ struct ExpenseEditorView: View {
     @State private var showingAddPaymentMethod = false
     @State private var errorMessage: String?
     @State private var receipt: ReceiptDraft?
+    @State private var receiptSelection = LatestSelectionToken()
+    @State private var receiptProcessingTask: Task<Void, Never>?
+    @State private var isReceiptProcessing = false
     @State private var didPopulate = false
     @State private var showingDeleteConfirm = false
     @FocusState private var amountFieldFocused: Bool
@@ -51,6 +55,14 @@ struct ExpenseEditorView: View {
 
     private var ledger: Ledger? {
         ledgers.first { $0.uuid == selectedLedgerID } ?? LedgerSelection.current(from: ledgers, appState: appState)
+    }
+
+    private var sourceIsWritable: Bool {
+        expense?.ledger.map(persistence.canWrite) ?? true
+    }
+
+    private var canSave: Bool {
+        sourceIsWritable && (ledger.map(persistence.canWrite) ?? false)
     }
 
     private var selectedCategory: Category? {
@@ -96,11 +108,17 @@ struct ExpenseEditorView: View {
                 categorySection(ledger)
                 paymentSection(ledger)
             }
-            if expense != nil {
+            if expense != nil && sourceIsWritable {
                 Section {
                     Button(String(localized: "Delete Expense", comment: "Button"), role: .destructive) {
                         showingDeleteConfirm = true
                     }
+                }
+            }
+            if !canSave {
+                Section {
+                    Text(LedgerAccess.readOnlyExplanation)
+                        .hmWrappingFooter()
                 }
             }
             if let errorMessage {
@@ -111,6 +129,7 @@ struct ExpenseEditorView: View {
                 }
             }
         }
+        .disabled(!sourceIsWritable)
         .formStyle(.grouped)
         #if os(macOS)
         .frame(minHeight: 0)
@@ -129,6 +148,7 @@ struct ExpenseEditorView: View {
             ToolbarItem(placement: .confirmationAction) {
                 Button(String(localized: "Save", comment: "Button")) { save() }
                     .keyboardShortcut(.defaultAction)
+                    .disabled(!canSave || isReceiptProcessing)
             }
         }
         #if os(iOS)
@@ -140,25 +160,27 @@ struct ExpenseEditorView: View {
             switch result {
             case .success(let urls):
                 guard let url = urls.first else { return }
-                applyReceipt { try ReceiptDraft.load(from: url) }
+                startReceiptProcessing {
+                    try await ReceiptDraft.load(from: url)
+                }
             case .failure(let error):
-                errorMessage = error.localizedDescription
+                failReceiptSelection(with: error)
             }
         }
         .quickLookPreview($receiptPreviewURL)
         .photosPicker(isPresented: $showingReceiptPhotosPicker, selection: $receiptPhotoItem, matching: .images)
         .onChange(of: receiptPhotoItem) { _, item in
             guard let item else { return }
-            Task {
-                do {
-                    guard let data = try await item.loadTransferable(type: Data.self) else {
-                        throw ReceiptDraftError.empty
-                    }
-                    applyReceipt { try ReceiptDraft.make(data: data, fileName: "receipt.jpg", type: .image) }
-                } catch {
-                    errorMessage = error.localizedDescription
+            receiptPhotoItem = nil
+            startReceiptProcessing {
+                guard let data = try await item.loadTransferable(type: Data.self) else {
+                    throw ReceiptDraftError.empty
                 }
-                receiptPhotoItem = nil
+                return try await ReceiptDraft.prepare(
+                    data: data,
+                    fileName: "receipt.jpg",
+                    typeIdentifier: UTType.image.identifier
+                )
             }
         }
         #endif
@@ -202,6 +224,9 @@ struct ExpenseEditorView: View {
                 }
             }
         }
+        .onDisappear {
+            cancelReceiptProcessing()
+        }
         .confirmationDialog(
             String(localized: "Delete this expense?", comment: "Alert"),
             isPresented: $showingDeleteConfirm,
@@ -212,7 +237,7 @@ struct ExpenseEditorView: View {
             }
             Button(String(localized: "Cancel", comment: "Button"), role: .cancel) {}
         } message: {
-            Text("This cannot be undone.")
+            Text(String(localized: "This cannot be undone."))
         }
         .sheet(isPresented: $showingAddPaymentMethod) {
             if let ledger {
@@ -234,26 +259,70 @@ struct ExpenseEditorView: View {
         ReceiptPickerSection(
             receipt: $receipt,
             errorMessage: $errorMessage,
+            isProcessing: isReceiptProcessing,
             showingFileImporter: $showingReceiptImporter,
             previewURL: $receiptPreviewURL,
-            onPickPhoto: startReceiptPhotoPicker
+            onPickPhoto: startReceiptPhotoPicker,
+            onRemoveReceipt: removeReceipt
         )
         #else
         ReceiptPickerSection(
             receipt: $receipt,
             errorMessage: $errorMessage,
-            onPickFile: startReceiptFilePicker
+            isProcessing: isReceiptProcessing,
+            onPickFile: startReceiptFilePicker,
+            onRemoveReceipt: removeReceipt
         )
         #endif
     }
 
-    private func applyReceipt(_ make: () throws -> ReceiptDraft) {
-        do {
-            receipt = try make()
-            errorMessage = nil
-        } catch {
-            errorMessage = error.localizedDescription
+    @MainActor
+    private func startReceiptProcessing(_ make: @escaping () async throws -> ReceiptDraft) {
+        receiptProcessingTask?.cancel()
+        let token = receiptSelection.begin()
+        isReceiptProcessing = true
+        errorMessage = nil
+        receiptProcessingTask = Task {
+            do {
+                let prepared = try await make()
+                try Task.checkCancellation()
+                guard receiptSelection.isCurrent(token) else { return }
+                receipt = prepared
+                errorMessage = nil
+            } catch is CancellationError {
+                // A newer selection owns the receipt state.
+            } catch {
+                guard receiptSelection.isCurrent(token) else { return }
+                errorMessage = error.localizedDescription
+            }
+            guard receiptSelection.isCurrent(token) else { return }
+            isReceiptProcessing = false
+            receiptProcessingTask = nil
         }
+    }
+
+    @MainActor
+    private func failReceiptSelection(with error: Error) {
+        cancelReceiptProcessing()
+        errorMessage = error.localizedDescription
+    }
+
+    @MainActor
+    private func cancelReceiptProcessing() {
+        receiptSelection.invalidate()
+        receiptProcessingTask?.cancel()
+        receiptProcessingTask = nil
+        isReceiptProcessing = false
+    }
+
+    @MainActor
+    private func removeReceipt() {
+        cancelReceiptProcessing()
+        receipt = nil
+        errorMessage = nil
+        #if os(iOS)
+        receiptPreviewURL = nil
+        #endif
     }
 
     #if os(iOS)
@@ -279,7 +348,9 @@ struct ExpenseEditorView: View {
         let finish: (NSApplication.ModalResponse) -> Void = { response in
             guard response == .OK, let url = panel.url else { return }
             Task { @MainActor in
-                applyReceipt { try ReceiptDraft.load(from: url) }
+                startReceiptProcessing {
+                    try await ReceiptDraft.load(from: url)
+                }
             }
         }
 
@@ -366,19 +437,20 @@ struct ExpenseEditorView: View {
                 } label: {
                     Label(String(localized: "Add Payment Method", comment: "Toolbar"), systemImage: "plus")
                         .font(.subheadline)
-                        .lineLimit(1)
+                        .lineLimit(2)
                         .frame(maxWidth: .infinity)
                         .padding(.horizontal, 10)
                         .padding(.vertical, 8)
                 }
                 .buttonStyle(.plain)
                 .hmGlassInteractive(in: Capsule())
+                .disabled(!persistence.canWrite(ledger))
             }
             .padding(.vertical, 4)
             .accessibilityElement(children: .contain)
             .accessibilityLabel(String(localized: "Paid with", comment: "Field"))
         } header: {
-            Text("Paid with")
+            Text(String(localized: "Paid with", comment: "Form section"))
         }
     }
 
@@ -446,7 +518,7 @@ struct ExpenseEditorView: View {
                 }
             }
         } header: {
-            Text("Amount")
+            Text(String(localized: "Amount", comment: "Form section"))
         } footer: {
             amountFooter
         }
@@ -455,10 +527,10 @@ struct ExpenseEditorView: View {
     @ViewBuilder
     private var amountFooter: some View {
         if showsDualCurrency {
-            Text("Enter what the card or wallet actually billed.")
+            Text(String(localized: "Enter what the card or wallet actually billed."))
                 .hmWrappingFooter()
         } else if needsReportingOverride, let ledger {
-            Text("This ledger reports in \(ledger.wrappedReportingCurrency). Enter the equivalent total.")
+            Text(String(localized: "This ledger reports in \(ledger.wrappedReportingCurrency). Enter the equivalent total."))
                 .hmWrappingFooter()
         }
     }
@@ -536,43 +608,53 @@ struct ExpenseEditorView: View {
             return
         }
 
-        let record = expense ?? Expense(context: context)
-        if expense == nil {
-            persistence.assign(record, toSameStoreAs: ledger)
-        }
-        record.merchant = merchant
-        record.note = note
-        record.occurredAt = occurredAt
-        record.updatedAt = Date()
-        record.spendAmount = spendAmount as NSDecimalNumber
-        record.spendCurrency = spendCurrency
-        record.chargedAmount = charged as NSDecimalNumber
-        record.chargedCurrency = chargedCode
-        record.reportingAmount = MoneyMath.reportingAmount(
+        let reportingAmount = MoneyMath.reportingAmount(
             spend: spendAmount,
             spendCurrency: spendCurrency,
             charged: charged,
             chargedCurrency: chargedCode,
             reportingCurrency: ledger.wrappedReportingCurrency,
             override: needsReportingOverride ? reportingOverride : nil
-        ) as NSDecimalNumber
-        record.reportingCurrency = ledger.wrappedReportingCurrency
-        record.ledger = ledger
-        record.category = category
-        record.paymentMethod = method
-        record.receiptData = receipt?.data
-        record.receiptFileName = receipt?.fileName
-        record.receiptContentType = receipt?.contentType
-        persistence.save()
-        appState.selectedLedgerID = ledger.uuid
-        dismiss()
+        )
+
+        do {
+            _ = try persistence.saveExpense(
+                expense,
+                to: ledger,
+                category: category,
+                paymentMethod: method,
+                values: ExpenseEditValues(
+                    merchant: merchant,
+                    note: note,
+                    occurredAt: occurredAt,
+                    spendAmount: spendAmount,
+                    spendCurrency: spendCurrency,
+                    chargedAmount: charged,
+                    chargedCurrency: chargedCode,
+                    reportingAmount: reportingAmount,
+                    reportingCurrency: ledger.wrappedReportingCurrency,
+                    receiptData: receipt?.data,
+                    receiptFileName: receipt?.fileName,
+                    receiptContentType: receipt?.contentType
+                )
+            )
+            appState.selectedLedgerID = ledger.uuid
+            appState.expenseToEdit = nil
+            dismiss()
+        } catch {
+            errorMessage = error.localizedDescription
+        }
     }
 
     private func deleteExpense() {
         guard let expense else { return }
-        persistence.deleteExpense(expense)
-        appState.expenseToEdit = nil
-        dismiss()
+        do {
+            try persistence.deleteExpense(expense)
+            appState.expenseToEdit = nil
+            dismiss()
+        } catch {
+            errorMessage = error.localizedDescription
+        }
     }
 }
 
@@ -586,6 +668,7 @@ private struct PaymentMethodChip: View {
             Label {
                 VStack(alignment: .leading, spacing: 1) {
                     Text(method.wrappedName)
+                        .lineLimit(2)
                     Text(method.wrappedBillingCurrency)
                         .font(.caption2)
                         .foregroundStyle(.secondary)
@@ -595,7 +678,6 @@ private struct PaymentMethodChip: View {
                     .symbolRenderingMode(.hierarchical)
             }
             .font(.subheadline)
-            .lineLimit(1)
             .frame(maxWidth: .infinity, alignment: .leading)
             .padding(.horizontal, 10)
             .padding(.vertical, 8)
@@ -631,11 +713,15 @@ private struct CategoryChip: View {
         Button(action: action) {
             Label(category.wrappedName, systemImage: category.wrappedSymbolName)
                 .font(.subheadline)
-                .lineLimit(1)
+                .lineLimit(2)
                 .frame(maxWidth: .infinity)
                 .padding(.horizontal, 10)
                 .padding(.vertical, 8)
-                .foregroundStyle(isSelected ? Color.white : Color.primary)
+                .foregroundStyle(
+                    isSelected
+                        ? CategoryContrast.foreground(forHex: category.wrappedColorHex)
+                        : Color.primary
+                )
                 .background(isSelected ? category.color : category.color.opacity(0.16), in: Capsule())
         }
         .buttonStyle(.plain)

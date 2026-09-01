@@ -2,6 +2,8 @@ import CoreData
 import SwiftUI
 
 struct ActivityView: View {
+    var showsSplitSettingsButton = false
+
     @Environment(AppState.self) private var appState
     @Environment(\.openWindow) private var openWindow
     @EnvironmentObject private var persistence: PersistenceController
@@ -16,16 +18,21 @@ struct ActivityView: View {
     private var ledgers: FetchedResults<Ledger>
 
     @State private var searchText = ""
+    @State private var debouncedSearchText = ""
 
     private var ledger: Ledger? {
         LedgerSelection.current(from: ledgers, appState: appState)
     }
 
+    private var isWritable: Bool {
+        ledger.map(persistence.canWrite) ?? false
+    }
+
     var body: some View {
         Group {
             if let ledger {
-                ExpenseList(ledger: ledger, searchText: searchText)
-                    .id(ledger.objectID)
+                ExpenseList(ledger: ledger, searchText: debouncedSearchText)
+                    .id("\(ledger.objectID.uriRepresentation().absoluteString)|\(debouncedSearchText)")
             } else {
                 ContentUnavailableView(
                     String(localized: "No Expenses", comment: "Empty title"),
@@ -35,6 +42,7 @@ struct ActivityView: View {
             }
         }
         .id(appState.selectedLedgerID)
+        .accessibilityIdentifier("activity.screen")
         .frame(minHeight: 0, maxHeight: .infinity)
         .navigationTitle(ledger?.wrappedName ?? String(localized: "Activity", comment: "Screen title"))
         #if os(iOS)
@@ -47,6 +55,14 @@ struct ActivityView: View {
             placement: .toolbar,
             prompt: String(localized: "Merchant or note", comment: "Search prompt")
         )
+        .task(id: searchText) {
+            do {
+                try await Task.sleep(for: .milliseconds(250))
+                debouncedSearchText = ExpenseSearch.normalized(searchText)
+            } catch {
+                // A newer search term superseded this task.
+            }
+        }
         .toolbar {
             #if os(macOS)
             ToolbarItem(placement: .primaryAction) {
@@ -71,6 +87,7 @@ struct ActivityView: View {
         .safeAreaInset(edge: .bottom) {
             bottomChrome
         }
+        .focusedValue(\.selectedLedgerIsWritable, isWritable)
         .onAppear {
             LedgerSelection.bindSelection(appState, fallback: ledger)
         }
@@ -83,6 +100,7 @@ struct ActivityView: View {
             Label(String(localized: "New Expense", comment: "Toolbar"), systemImage: "plus")
         }
         .accessibilityLabel(String(localized: "New Expense", comment: "Toolbar"))
+        .disabled(!isWritable)
     }
 
     #if os(iOS)
@@ -96,6 +114,34 @@ struct ActivityView: View {
         }
         .hmGlassRoundProminentButton()
         .accessibilityLabel(String(localized: "New Expense", comment: "Toolbar"))
+        .disabled(!isWritable)
+    }
+
+    @ViewBuilder
+    private var splitSettingsButton: some View {
+        if #available(iOS 26.0, *) {
+            splitSettingsButtonLabel
+                .buttonStyle(.glass)
+                .buttonBorderShape(.circle)
+                .controlSize(.extraLarge)
+        } else {
+            splitSettingsButtonLabel
+                .buttonStyle(.bordered)
+                .buttonBorderShape(.circle)
+                .controlSize(.large)
+        }
+    }
+
+    private var splitSettingsButtonLabel: some View {
+        Button {
+            appState.presentingSettings = true
+        } label: {
+            Image(systemName: "gearshape")
+                .font(.body.weight(.semibold))
+                .frame(minWidth: 22, minHeight: 22)
+        }
+        .accessibilityLabel(String(localized: "Settings", comment: "Toolbar"))
+        .accessibilityIdentifier("split.settings")
     }
     #endif
 
@@ -103,11 +149,19 @@ struct ActivityView: View {
     private var bottomChrome: some View {
         #if os(iOS)
         VStack(spacing: 10) {
+            if ledger != nil && !isWritable {
+                Text(LedgerAccess.readOnlyExplanation)
+                    .hmWrappingFooter()
+                    .padding(.horizontal)
+            }
             if showsiCloudBanner {
                 iCloudStatusBanner()
                     .padding(.horizontal)
             }
             HStack {
+                if showsSplitSettingsButton {
+                    splitSettingsButton
+                }
                 Spacer()
                 newExpenseRoundButton
             }
@@ -115,17 +169,25 @@ struct ActivityView: View {
         }
         .padding(.bottom, 8)
         #else
-        if showsiCloudBanner {
-            iCloudStatusBanner()
-                .padding(.horizontal)
-                .padding(.bottom, 8)
+        VStack(spacing: 8) {
+            if ledger != nil && !isWritable {
+                Text(LedgerAccess.readOnlyExplanation)
+                    .hmWrappingFooter()
+                    .padding(.horizontal)
+            }
+            if showsiCloudBanner {
+                iCloudStatusBanner()
+                    .padding(.horizontal)
+            }
         }
+        .padding(.bottom, 8)
         #endif
     }
 
     private var showsiCloudBanner: Bool {
         accountMonitor.shouldShowBanner
             || (!persistence.cloudKitEnabled && !accountMonitor.isDetermining)
+            || persistence.shareError != nil
     }
 }
 
@@ -135,6 +197,7 @@ private struct ExpenseList: View {
     @Environment(AppState.self) private var appState
     @Environment(\.openWindow) private var openWindow
     @EnvironmentObject private var persistence: PersistenceController
+    @State private var mutationError: String?
 
     @FetchRequest private var expenses: FetchedResults<Expense>
 
@@ -143,68 +206,88 @@ private struct ExpenseList: View {
         self.searchText = searchText
         _expenses = FetchRequest(
             sortDescriptors: [NSSortDescriptor(keyPath: \Expense.occurredAt, ascending: false)],
-            predicate: NSPredicate(format: "ledger == %@", ledger),
+            predicate: ExpenseSearch.predicate(ledger: ledger, text: searchText),
             animation: .default
         )
     }
 
-    private var filtered: [Expense] {
-        let term = searchText.trimmingCharacters(in: .whitespacesAndNewlines)
-        guard !term.isEmpty else { return Array(expenses) }
-        return expenses.filter {
-            $0.wrappedMerchant.localizedCaseInsensitiveContains(term)
-                || $0.wrappedNote.localizedCaseInsensitiveContains(term)
-                || ($0.category?.wrappedName.localizedCaseInsensitiveContains(term) ?? false)
-        }
-    }
-
     var body: some View {
-        if filtered.isEmpty {
-            ContentUnavailableView {
-                Label(String(localized: "No Expenses", comment: "Empty title"), systemImage: "tray")
-            } description: {
-                Text("Add your first spend to get started.")
-            } actions: {
-                Button {
-                    HowMuchPresenter.newExpense(appState: appState, openWindow: openWindow)
-                } label: {
-                    Label(String(localized: "New Expense", comment: "Toolbar"), systemImage: "plus")
-                }
-                .hmGlassProminentButton()
-            }
-            .frame(maxWidth: .infinity, maxHeight: .infinity)
-        } else {
-            List {
-                ForEach(filtered, id: \.objectID) { expense in
-                    Button {
-                        HowMuchPresenter.editExpense(expense, appState: appState, openWindow: openWindow)
-                    } label: {
-                        ExpenseRow(expense: expense)
-                    }
-                    .buttonStyle(.plain)
-                    .swipeActions(edge: .trailing, allowsFullSwipe: true) {
-                        Button(role: .destructive) {
-                            delete(expense)
-                        } label: {
-                            Label(String(localized: "Delete", comment: "Button"), systemImage: "trash")
+        Group {
+            if expenses.isEmpty {
+                if ExpenseSearch.normalized(searchText).isEmpty {
+                    ContentUnavailableView {
+                        Label(String(localized: "No Expenses", comment: "Empty title"), systemImage: "tray")
+                    } description: {
+                        Text(String(localized: "Add your first spend to get started."))
+                    } actions: {
+                        if persistence.canWrite(ledger) {
+                            Button {
+                                HowMuchPresenter.newExpense(appState: appState, openWindow: openWindow)
+                            } label: {
+                                Label(String(localized: "New Expense", comment: "Toolbar"), systemImage: "plus")
+                            }
+                            .hmGlassProminentButton()
                         }
                     }
-                    .contextMenu {
-                        Button(String(localized: "Delete", comment: "Button"), role: .destructive) {
-                            delete(expense)
+                    .frame(maxWidth: .infinity, maxHeight: .infinity)
+                } else {
+                    ContentUnavailableView.search(text: searchText)
+                        .frame(maxWidth: .infinity, maxHeight: .infinity)
+                }
+            } else {
+                List {
+                    ForEach(expenses, id: \.objectID) { expense in
+                        if persistence.canWrite(ledger) {
+                            Button {
+                                HowMuchPresenter.editExpense(expense, appState: appState, openWindow: openWindow)
+                            } label: {
+                                ExpenseRow(expense: expense)
+                            }
+                            .buttonStyle(.plain)
+                            .swipeActions(edge: .trailing, allowsFullSwipe: true) {
+                                Button(role: .destructive) {
+                                    delete(expense)
+                                } label: {
+                                    Label(String(localized: "Delete", comment: "Button"), systemImage: "trash")
+                                }
+                            }
+                            .contextMenu {
+                                Button(String(localized: "Delete", comment: "Button"), role: .destructive) {
+                                    delete(expense)
+                                }
+                            }
+                        } else {
+                            ExpenseRow(expense: expense)
                         }
                     }
                 }
+                #if os(macOS)
+                .listStyle(.inset)
+                .hmMacListFillsColumn()
+                #endif
             }
-            #if os(macOS)
-            .listStyle(.inset)
-            .hmMacListFillsColumn()
-            #endif
+        }
+        .alert(
+            String(localized: "Expense Could Not Be Deleted", comment: "Alert"),
+            isPresented: Binding(
+                get: { mutationError != nil },
+                set: { if !$0 { mutationError = nil } }
+            )
+        ) {
+            Button(String(localized: "OK", comment: "Button"), role: .cancel) {}
+        } message: {
+            if let mutationError {
+                Text(mutationError)
+            }
         }
     }
 
     private func delete(_ expense: Expense) {
-        persistence.deleteExpense(expense)
+        do {
+            try persistence.deleteExpense(expense)
+        } catch {
+            mutationError = error.localizedDescription
+        }
     }
 }
 

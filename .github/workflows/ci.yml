@@ -1,0 +1,37 @@
+name: CI
+
+on:
+  pull_request:
+  push:
+    branches: [master]
+  workflow_dispatch:
+
+concurrency:
+  group: ci-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  build-and-test:
+    runs-on: macos-26
+    timeout-minutes: 60
+    env:
+      HOWMUCH_RUN_UI_TESTS: "1"
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Select newest installed Xcode
+        shell: bash
+        run: |
+          set -euo pipefail
+          XCODE_APP="$(
+            for app in /Applications/Xcode*.app; do
+              version="$(/usr/libexec/PlistBuddy -c 'Print :CFBundleShortVersionString' "$app/Contents/Info.plist")"
+              printf '%s|%s\n' "$version" "$app"
+            done | /usr/bin/sort -r | /usr/bin/awk -F '|' 'NR == 1 { print $2; exit }'
+          )"
+          test -n "$XCODE_APP"
+          echo "DEVELOPER_DIR=$XCODE_APP/Contents/Developer" >> "$GITHUB_ENV"
+          "$XCODE_APP/Contents/Developer/usr/bin/xcodebuild" -version
+
+      - name: Run release CI checks
+        run: Scripts/ci.sh

@@ -45,7 +45,7 @@ enum LedgerKind: Int16, CaseIterable, Identifiable, Sendable {
         case .personal:
             String(localized: "Personal ledgers stay private and sync across your own devices with iCloud.")
         case .household:
-            String(localized: "Invite people with Apple ID via Messages or Mail after you create the ledger.")
+            String(localized: "Invite people with their Apple Account via Messages or Mail after you create the ledger.")
         }
     }
 }

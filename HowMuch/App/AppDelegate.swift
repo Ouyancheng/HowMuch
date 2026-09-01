@@ -8,6 +8,7 @@ import AppKit
 #endif
 
 #if os(iOS)
+@MainActor
 final class AppDelegate: NSObject, UIApplicationDelegate {
     func application(
         _ application: UIApplication,
@@ -20,6 +21,7 @@ final class AppDelegate: NSObject, UIApplicationDelegate {
     }
 }
 
+@MainActor
 final class SceneDelegate: NSObject, UIWindowSceneDelegate {
     func windowScene(
         _ windowScene: UIWindowScene,
@@ -31,6 +33,7 @@ final class SceneDelegate: NSObject, UIWindowSceneDelegate {
 #endif
 
 #if os(macOS)
+@MainActor
 final class AppDelegate: NSObject, NSApplicationDelegate {
     func applicationDidFinishLaunching(_ notification: Notification) {
         MacWindowChrome.enableFullScreenOnOpenWindows()
@@ -38,9 +41,10 @@ final class AppDelegate: NSObject, NSApplicationDelegate {
             forName: NSWindow.didBecomeKeyNotification,
             object: nil,
             queue: .main
-        ) { notification in
-            guard let window = notification.object as? NSWindow else { return }
-            MacWindowChrome.enableFullScreen(window)
+        ) { _ in
+            Task { @MainActor in
+                MacWindowChrome.enableFullScreenOnOpenWindows()
+            }
         }
     }
 
@@ -49,6 +53,7 @@ final class AppDelegate: NSObject, NSApplicationDelegate {
     }
 }
 
+@MainActor
 enum MacWindowChrome {
     static func enableFullScreenOnOpenWindows() {
         NSApp.windows.forEach(enableFullScreen)

@@ -66,7 +66,7 @@ public final class Expense: NSManagedObject {
     }
 
     var hasReceipt: Bool {
-        !(receiptFileName?.isEmpty ?? true) || !(receiptContentType?.isEmpty ?? true)
+        !(receiptData?.isEmpty ?? true)
     }
 
     func insightsReportingAmount(in reportingCurrency: String) -> Decimal {

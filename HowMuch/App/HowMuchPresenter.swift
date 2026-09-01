@@ -1,5 +1,16 @@
 import SwiftUI
 
+private struct SelectedLedgerWritableKey: FocusedValueKey {
+    typealias Value = Bool
+}
+
+extension FocusedValues {
+    var selectedLedgerIsWritable: Bool? {
+        get { self[SelectedLedgerWritableKey.self] }
+        set { self[SelectedLedgerWritableKey.self] = newValue }
+    }
+}
+
 enum HowMuchWindowID {
     static let newExpense = "new-expense"
     static let editExpense = "edit-expense"

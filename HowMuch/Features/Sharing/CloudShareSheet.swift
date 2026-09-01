@@ -8,10 +8,12 @@ struct CloudShareSheet: UIViewControllerRepresentable {
     let share: CKShare
     let container: CKContainer
     var onEnd: () -> Void = {}
+    var onStop: () -> Void = {}
+    var onError: (Error) -> Void = { _ in }
 
     func makeUIViewController(context: Context) -> UICloudSharingController {
         let controller = UICloudSharingController(share: share, container: container)
-        controller.availablePermissions = [.allowReadWrite, .allowPrivate]
+        controller.availablePermissions = [.allowReadWrite, .allowReadOnly, .allowPrivate]
         controller.delegate = context.coordinator
         return controller
     }
@@ -19,14 +21,30 @@ struct CloudShareSheet: UIViewControllerRepresentable {
     func updateUIViewController(_ uiViewController: UICloudSharingController, context: Context) {}
 
     func makeCoordinator() -> Coordinator {
-        Coordinator(onEnd: onEnd)
+        Coordinator(onEnd: onEnd, onStop: onStop, onError: onError)
     }
 
     final class Coordinator: NSObject, UICloudSharingControllerDelegate {
         let onEnd: () -> Void
-        init(onEnd: @escaping () -> Void) { self.onEnd = onEnd }
+        let onStop: () -> Void
+        let onError: (Error) -> Void
 
-        func cloudSharingController(_ csc: UICloudSharingController, failedToSaveShareWithError error: Error) {}
+        init(
+            onEnd: @escaping () -> Void,
+            onStop: @escaping () -> Void,
+            onError: @escaping (Error) -> Void
+        ) {
+            self.onEnd = onEnd
+            self.onStop = onStop
+            self.onError = onError
+        }
+
+        func cloudSharingController(
+            _ csc: UICloudSharingController,
+            failedToSaveShareWithError error: Error
+        ) {
+            onError(error)
+        }
 
         func itemTitle(for csc: UICloudSharingController) -> String? {
             csc.share?[CKShare.SystemFieldKey.title] as? String
@@ -37,7 +55,7 @@ struct CloudShareSheet: UIViewControllerRepresentable {
         }
 
         func cloudSharingControllerDidStopSharing(_ csc: UICloudSharingController) {
-            onEnd()
+            onStop()
         }
     }
 }

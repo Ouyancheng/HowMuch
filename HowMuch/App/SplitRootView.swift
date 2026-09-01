@@ -15,21 +15,37 @@ struct SplitRootView: View {
     var body: some View {
         NavigationSplitView {
             LedgerSidebar(ledgers: Array(ledgers))
-                .navigationSplitViewColumnWidth(min: 200, ideal: 240, max: 300)
+                .navigationSplitViewColumnWidth(min: 180, ideal: 230, max: 300)
                 .frame(minHeight: 0, maxHeight: .infinity)
         } content: {
-            ActivityView()
-                .navigationSplitViewColumnWidth(min: 300, ideal: 400, max: 560)
+            activityColumn
+                .navigationSplitViewColumnWidth(min: 280, ideal: 390, max: 560)
                 .frame(minHeight: 0, maxHeight: .infinity)
         } detail: {
             InsightsView()
                 .frame(minHeight: 0, maxHeight: .infinity)
         }
         .navigationSplitViewStyle(.balanced)
+        #if os(macOS)
         .frame(minWidth: 720, maxWidth: .infinity, minHeight: 400, maxHeight: .infinity)
+        #else
+        .frame(minHeight: 0, maxHeight: .infinity)
+        #endif
         .onAppear {
             LedgerSelection.bindSelection(appState, fallback: LedgerSelection.current(from: ledgers, appState: appState))
         }
+    }
+
+    @ViewBuilder
+    private var activityColumn: some View {
+        #if os(iOS)
+        // RootView presents SplitRootView only for regular-width iOS layouts.
+        // Child split columns can report a compact size class when collapsed,
+        // so do not use the column-local environment to hide this action.
+        ActivityView(showsSplitSettingsButton: true)
+        #else
+        ActivityView()
+        #endif
     }
 }
 
@@ -65,8 +81,26 @@ struct LedgerSidebar: View {
             }
         }
         .listStyle(.sidebar)
+        .accessibilityIdentifier("sidebar.navigation")
         .hmMacListFillsColumn()
         .navigationTitle(String(localized: "Ledgers", comment: "Sidebar title"))
+        #if os(iOS)
+        .safeAreaInset(edge: .bottom) {
+            HStack {
+                Button {
+                    appState.presentingSettings = true
+                } label: {
+                    Label(String(localized: "Settings", comment: "Sidebar action"), systemImage: "gear")
+                }
+                .accessibilityIdentifier("sidebar.settings")
+                .buttonStyle(.plain)
+                .padding(.vertical, 10)
+                Spacer()
+            }
+            .padding(.horizontal)
+            .background(.bar)
+        }
+        #endif
     }
 
     private func ledgerButton(_ ledger: Ledger) -> some View {
@@ -94,6 +128,7 @@ struct LedgerRow: View {
                 Text(ledger.wrappedReportingCurrency)
                     .font(.caption)
                     .foregroundStyle(.secondary)
+                    .accessibilityIdentifier("ledger.currency")
             }
         } icon: {
             Image(systemName: ledger.ledgerKind.symbolName)

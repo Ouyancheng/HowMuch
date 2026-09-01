@@ -1,12 +1,18 @@
 import SwiftUI
 import UniformTypeIdentifiers
-#if os(macOS)
+#if os(iOS)
+import UIKit
+#else
 import AppKit
 #endif
 
 struct ReceiptPickerSection: View {
     @Binding var receipt: ReceiptDraft?
     @Binding var errorMessage: String?
+    @Environment(\.scenePhase) private var scenePhase
+    let isProcessing: Bool
+    @State private var previewSelection = LatestSelectionToken()
+    @State private var previewTask: Task<Void, Never>?
     #if os(iOS)
     @Binding var showingFileImporter: Bool
     @Binding var previewURL: URL?
@@ -14,6 +20,7 @@ struct ReceiptPickerSection: View {
     #else
     var onPickFile: () -> Void
     #endif
+    var onRemoveReceipt: () -> Void
 
     var body: some View {
         Section {
@@ -21,20 +28,72 @@ struct ReceiptPickerSection: View {
                 receiptPreview(receipt)
                 sourceButtons
                 Button(String(localized: "Remove Receipt", comment: "Button"), role: .destructive) {
-                    self.receipt = nil
-                    #if os(iOS)
-                    previewURL = nil
-                    #endif
+                    onRemoveReceipt()
                 }
             } else {
                 sourceButtons
             }
+            if isProcessing {
+                HStack {
+                    ProgressView()
+                    Text(String(localized: "Preparing receipt…", comment: "Receipt progress"))
+                        .foregroundStyle(.secondary)
+                }
+                .accessibilityIdentifier("receipt.processing")
+            }
         } header: {
-            Text("Receipt")
+            Text(String(localized: "Receipt", comment: "Form section"))
         } footer: {
-            Text("Optional. Photos and PDFs, up to 10 MB.")
+            Text(String(localized: "Optional. Photos and PDFs, up to 10 MB."))
                 .hmWrappingFooter()
         }
+        .task {
+            _ = await Task.detached(priority: .utility) {
+                ReceiptPreviewFiles.removeStale()
+            }.value
+        }
+        .onChange(of: scenePhase) { _, phase in
+            guard phase == .background else { return }
+            cancelPreview()
+            #if os(iOS)
+            let oldURL = previewURL
+            previewURL = nil
+            Task.detached(priority: .utility) {
+                ReceiptPreviewFiles.cleanup(oldURL)
+                ReceiptPreviewFiles.removeStale()
+            }
+            #else
+            Task.detached(priority: .utility) {
+                ReceiptPreviewFiles.removeStale()
+            }
+            #endif
+        }
+        .onChange(of: receipt) { _, _ in
+            cancelPreview()
+            #if os(iOS)
+            previewURL = nil
+            #endif
+        }
+        #if os(iOS)
+        .onChange(of: previewURL) { oldURL, newURL in
+            guard oldURL != newURL else { return }
+            Task.detached(priority: .utility) {
+                ReceiptPreviewFiles.cleanup(oldURL)
+            }
+        }
+        .onDisappear {
+            cancelPreview()
+            let oldURL = previewURL
+            previewURL = nil
+            Task.detached(priority: .utility) {
+                ReceiptPreviewFiles.cleanup(oldURL)
+            }
+        }
+        #else
+        .onDisappear {
+            cancelPreview()
+        }
+        #endif
     }
 
     @ViewBuilder
@@ -71,19 +130,10 @@ struct ReceiptPickerSection: View {
     @ViewBuilder
     private func receiptPreview(_ receipt: ReceiptDraft) -> some View {
         Button {
-            do {
-                let url = try receipt.previewFileURL()
-                #if os(iOS)
-                previewURL = url
-                #else
-                NSWorkspace.shared.open(url)
-                #endif
-            } catch {
-                errorMessage = error.localizedDescription
-            }
+            openPreview(receipt)
         } label: {
             HStack(spacing: 12) {
-                receiptThumbnail(receipt)
+                ReceiptThumbnailView(receipt: receipt)
                 VStack(alignment: .leading, spacing: 2) {
                     Text(receipt.displayName)
                         .foregroundStyle(.primary)
@@ -102,27 +152,79 @@ struct ReceiptPickerSection: View {
         .accessibilityLabel(String(localized: "View receipt", comment: "Button"))
     }
 
-    @ViewBuilder
-    private func receiptThumbnail(_ receipt: ReceiptDraft) -> some View {
-        if !receipt.isPDF, let thumbnail = receipt.thumbnail {
-            platformImage(thumbnail)
-                .resizable()
-                .scaledToFill()
-                .frame(width: 44, height: 44)
-                .clipShape(RoundedRectangle(cornerRadius: 8, style: .continuous))
-        } else {
-            Image(systemName: receipt.isPDF ? "doc.richtext" : "photo")
-                .font(.title3)
-                .frame(width: 44, height: 44)
-                .foregroundStyle(.secondary)
+    @MainActor
+    private func openPreview(_ receipt: ReceiptDraft) {
+        previewTask?.cancel()
+        let token = previewSelection.begin()
+        previewTask = Task {
+            do {
+                let url = try await receipt.previewFileURL()
+                guard !Task.isCancelled, previewSelection.isCurrent(token) else {
+                    await Task.detached(priority: .utility) {
+                        ReceiptPreviewFiles.cleanup(url)
+                    }.value
+                    return
+                }
+                #if os(iOS)
+                previewURL = url
+                #else
+                NSWorkspace.shared.open(url)
+                try? await Task.sleep(for: .seconds(120))
+                await Task.detached(priority: .utility) {
+                    ReceiptPreviewFiles.cleanup(url)
+                }.value
+                #endif
+            } catch is CancellationError {
+                // A newer preview request owns the result.
+            } catch {
+                guard previewSelection.isCurrent(token) else { return }
+                errorMessage = error.localizedDescription
+            }
+            guard previewSelection.isCurrent(token) else { return }
+            previewTask = nil
         }
     }
 
-    private func platformImage(_ thumbnail: ReceiptDraft.Thumbnail) -> Image {
+    @MainActor
+    private func cancelPreview() {
+        previewSelection.invalidate()
+        previewTask?.cancel()
+        previewTask = nil
+    }
+}
+
+private struct ReceiptThumbnailView: View {
+    let receipt: ReceiptDraft
+    @State private var thumbnailData: Data?
+    @ScaledMetric(relativeTo: .body) private var size = 44
+
+    var body: some View {
+        Group {
+            if !receipt.isPDF, let thumbnailData, let image = platformImage(thumbnailData) {
+                image
+                    .resizable()
+                    .scaledToFill()
+            } else {
+                Image(systemName: receipt.isPDF ? "doc.richtext" : "photo")
+                    .font(.title3)
+                    .foregroundStyle(.secondary)
+            }
+        }
+        .frame(width: size, height: size)
+        .clipShape(RoundedRectangle(cornerRadius: 8, style: .continuous))
+        .accessibilityHidden(true)
+        .task(id: receipt.data) {
+            thumbnailData = await receipt.thumbnailData()
+        }
+    }
+
+    private func platformImage(_ data: Data) -> Image? {
         #if os(iOS)
-        Image(uiImage: thumbnail)
+        guard let image = UIImage(data: data) else { return nil }
+        return Image(uiImage: image)
         #else
-        Image(nsImage: thumbnail)
+        guard let image = NSImage(data: data) else { return nil }
+        return Image(nsImage: image)
         #endif
     }
 }

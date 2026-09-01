@@ -22,6 +22,31 @@ struct HowMuchApp: App {
                 .environmentObject(persistence)
                 .environment(appState)
                 .environment(accountMonitor)
+                .task(id: accountMonitor.generation) {
+                    await persistence.applyAccountIdentity(accountMonitor.identity)
+                }
+                .onChange(of: persistence.stackGeneration, initial: true) { _, generation in
+                    appState.resetForStackGeneration(generation)
+                }
+                .onOpenURL { url in
+                    let generation = appState.beginOpeningArchive()
+                    let accessed = url.startAccessingSecurityScopedResource()
+                    Task {
+                        do {
+                            let package = try await Task.detached(priority: .userInitiated) {
+                                defer {
+                                    if accessed {
+                                        url.stopAccessingSecurityScopedResource()
+                                    }
+                                }
+                                return try HowMuchArchiveDocument.loadPackage(from: url)
+                            }.value
+                            appState.finishOpeningArchive(package, generation: generation)
+                        } catch {
+                            appState.failOpeningArchive(error, generation: generation)
+                        }
+                    }
+                }
                 #if os(macOS)
                 .windowFullScreenBehavior(.enabled)
                 .windowResizeBehavior(.enabled)
@@ -38,8 +63,10 @@ struct HowMuchApp: App {
 
         #if os(macOS)
         WindowGroup(id: HowMuchWindowID.newExpense) {
-            MacEditorContainer {
-                ExpenseEditorView(expense: nil)
+            DataAvailabilityGate {
+                MacEditorContainer {
+                    ExpenseEditorView(expense: nil)
+                }
             }
             .environment(\.managedObjectContext, persistence.viewContext)
             .environmentObject(persistence)
@@ -51,8 +78,10 @@ struct HowMuchApp: App {
         .windowToolbarStyle(.unified)
 
         WindowGroup(id: HowMuchWindowID.editExpense, for: UUID.self) { $expenseID in
-            MacEditorContainer {
-                ExpenseWindowHost(expenseID: expenseID)
+            DataAvailabilityGate {
+                MacEditorContainer {
+                    ExpenseWindowHost(expenseID: expenseID)
+                }
             }
             .environment(\.managedObjectContext, persistence.viewContext)
             .environmentObject(persistence)
@@ -64,8 +93,10 @@ struct HowMuchApp: App {
         .windowToolbarStyle(.unified)
 
         WindowGroup(id: HowMuchWindowID.ledgerSettings, for: UUID.self) { $ledgerID in
-            MacEditorContainer {
-                LedgerSettingsWindowHost(ledgerID: ledgerID)
+            DataAvailabilityGate {
+                MacEditorContainer {
+                    LedgerSettingsWindowHost(ledgerID: ledgerID)
+                }
             }
             .environment(\.managedObjectContext, persistence.viewContext)
             .environmentObject(persistence)
@@ -78,8 +109,10 @@ struct HowMuchApp: App {
         .windowToolbarStyle(.unified)
 
         WindowGroup(id: HowMuchWindowID.newPersonal) {
-            MacEditorContainer {
-                NewLedgerView(kind: .personal)
+            DataAvailabilityGate {
+                MacEditorContainer {
+                    NewLedgerView(kind: .personal)
+                }
             }
             .environment(\.managedObjectContext, persistence.viewContext)
             .environmentObject(persistence)
@@ -92,8 +125,10 @@ struct HowMuchApp: App {
         .windowToolbarStyle(.unified)
 
         WindowGroup(id: HowMuchWindowID.newHousehold) {
-            MacEditorContainer {
-                NewLedgerView(kind: .household)
+            DataAvailabilityGate {
+                MacEditorContainer {
+                    NewLedgerView(kind: .household)
+                }
             }
             .environment(\.managedObjectContext, persistence.viewContext)
             .environmentObject(persistence)
@@ -121,6 +156,7 @@ struct HowMuchApp: App {
 #if os(macOS)
 struct HowMuchCommands: Commands {
     @Environment(\.openWindow) private var openWindow
+    @FocusedValue(\.selectedLedgerIsWritable) private var selectedLedgerIsWritable
 
     var body: some Commands {
         CommandGroup(replacing: .newItem) {
@@ -128,6 +164,7 @@ struct HowMuchCommands: Commands {
                 openWindow(id: HowMuchWindowID.newExpense)
             }
             .keyboardShortcut("n")
+            .disabled(selectedLedgerIsWritable != true)
             Button(String(localized: "New Personal Ledger", comment: "Menu item")) {
                 openWindow(id: HowMuchWindowID.newPersonal)
             }
