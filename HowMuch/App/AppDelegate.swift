@@ -35,7 +35,17 @@ final class SceneDelegate: NSObject, UIWindowSceneDelegate {
 #if os(macOS)
 @MainActor
 final class AppDelegate: NSObject, NSApplicationDelegate {
+    private var uiTestingFallbackWindow: NSWindow?
+
     func applicationDidFinishLaunching(_ notification: Notification) {
+        if PersistenceController.isUITesting {
+            UserDefaults.standard.set(false, forKey: "NSQuitAlwaysKeepsWindows")
+            NSWindow.allowsAutomaticWindowTabbing = false
+            NSApp.activate(ignoringOtherApps: true)
+            DispatchQueue.main.async {
+                self.ensureVisibleMainWindow()
+            }
+        }
         MacWindowChrome.enableFullScreenOnOpenWindows()
         NotificationCenter.default.addObserver(
             forName: NSWindow.didBecomeKeyNotification,
@@ -46,6 +56,47 @@ final class AppDelegate: NSObject, NSApplicationDelegate {
                 MacWindowChrome.enableFullScreenOnOpenWindows()
             }
         }
+    }
+
+    func applicationShouldHandleReopen(_ sender: NSApplication, hasVisibleWindows flag: Bool) -> Bool {
+        if !flag {
+            NSApp.activate(ignoringOtherApps: true)
+            if PersistenceController.isUITesting {
+                ensureVisibleMainWindow()
+            }
+        }
+        return true
+    }
+
+    /// XCTest launches this SwiftUI app without restoring a WindowGroup scene,
+    /// so UI tests see a menu bar and no window. Host the same root view when
+    /// that happens.
+    private func ensureVisibleMainWindow() {
+        if NSApp.windows.contains(where: { $0.styleMask.contains(.titled) && $0.frame.width > 50 }) {
+            NSApp.activate(ignoringOtherApps: true)
+            return
+        }
+
+        let persistence = PersistenceController.shared
+        let root = RootView()
+            .environment(\.managedObjectContext, persistence.viewContext)
+            .environmentObject(persistence)
+            .environment(AppState())
+            .environment(CloudKitAccountMonitor())
+        let window = NSWindow(
+            contentRect: NSRect(x: 0, y: 0, width: 920, height: 560),
+            styleMask: [.titled, .closable, .miniaturizable, .resizable],
+            backing: .buffered,
+            defer: false
+        )
+        window.title = "HowMuch"
+        window.isReleasedWhenClosed = false
+        window.contentView = NSHostingView(rootView: root)
+        window.center()
+        window.makeKeyAndOrderFront(nil)
+        MacWindowChrome.enableFullScreen(window)
+        uiTestingFallbackWindow = window
+        NSApp.activate(ignoringOtherApps: true)
     }
 
     func application(_ application: NSApplication, userDidAcceptCloudKitShareWith cloudKitShareMetadata: CKShare.Metadata) {

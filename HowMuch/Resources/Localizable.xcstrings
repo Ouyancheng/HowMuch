@@ -1571,7 +1571,7 @@
 
     },
     "iCloud" : {
-      "comment" : "Field\nSection",
+      "comment" : "Field\nSection\nSettings tab",
       "localizations" : {
         "zh-Hans" : {
           "stringUnit" : {
@@ -2327,7 +2327,7 @@
       }
     },
     "New Expense" : {
-      "comment" : "Screen title\nToolbar",
+      "comment" : "Menu item\nScreen title\nToolbar",
       "localizations" : {
         "zh-Hans" : {
           "stringUnit" : {
@@ -2344,7 +2344,7 @@
       }
     },
     "New Family Ledger" : {
-      "comment" : "List action\nScreen title\nSidebar action\nToolbar",
+      "comment" : "List action\nMenu item\nScreen title\nSidebar action\nToolbar",
       "localizations" : {
         "zh-Hans" : {
           "stringUnit" : {
@@ -2378,7 +2378,7 @@
       }
     },
     "New Personal Ledger" : {
-      "comment" : "List action\nScreen title\nSettings action\nSidebar action\nToolbar",
+      "comment" : "List action\nMenu item\nScreen title\nSettings action\nSidebar action\nToolbar",
       "localizations" : {
         "zh-Hans" : {
           "stringUnit" : {

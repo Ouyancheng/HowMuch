@@ -42,6 +42,7 @@ struct ActivityView: View {
             }
         }
         .id(appState.selectedLedgerID)
+        .accessibilityElement(children: .contain)
         .accessibilityIdentifier("activity.screen")
         .frame(minHeight: 0, maxHeight: .infinity)
         .navigationTitle(ledger?.wrappedName ?? String(localized: "Activity", comment: "Screen title"))
@@ -265,6 +266,7 @@ private struct ExpenseList: View {
                 .listStyle(.inset)
                 .hmMacListFillsColumn()
                 #endif
+                .accessibilityIdentifier("activity.screen")
             }
         }
         .alert(

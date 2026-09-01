@@ -8,12 +8,22 @@ final class HowMuchUITests: XCTestCase {
     @MainActor
     func testSampleDataSmoke() throws {
         let app = launchApp()
-        XCTAssertTrue(element("activity.screen", in: app).waitForExistence(timeout: 10))
 
         #if os(macOS)
-        app.activate()
-        XCTAssertTrue(element("insights.range", in: app).waitForExistence(timeout: 5))
+        // XCTest can launch the Mac app with a menu bar and no scene window.
+        XCTAssertTrue(app.windows.firstMatch.waitForExistence(timeout: 10), "HowMuch window did not appear")
+        // The first column is a real List. NavigationSplitView content
+        // identifiers are often omitted from the macOS accessibility tree.
+        if !waitForAny(["sidebar.navigation", "app.loaded", "activity.screen"], in: app, timeout: 10) {
+            XCTFail("Main window did not become reachable. Hierarchy: \(app.debugDescription)")
+            return
+        }
+        XCTAssertFalse(element("app.locked", in: app).exists, "UI testing launched into the locked-data gate")
         XCTAssertTrue(element("ledger.currency", in: app).waitForExistence(timeout: 5))
+        if !waitForAny(["insights.range", "activity.screen"], in: app, timeout: 5) {
+            XCTFail("Split content columns were not reachable. Hierarchy: \(app.debugDescription)")
+            return
+        }
 
         openMacSettings(in: app)
         XCTAssertTrue(element("settings.screen", in: app).waitForExistence(timeout: 5))
@@ -24,6 +34,8 @@ final class HowMuchUITests: XCTestCase {
         XCTAssertTrue(export.isEnabled)
         XCTAssertTrue(importArchive.isEnabled)
         #else
+        XCTAssertTrue(element("activity.screen", in: app).waitForExistence(timeout: 10))
+
         let settingsTab = app.tabBars.buttons["Settings"]
         if settingsTab.waitForExistence(timeout: 2) {
             app.tabBars.buttons["Insights"].tap()
@@ -63,16 +75,29 @@ final class HowMuchUITests: XCTestCase {
         let app = XCUIApplication()
         app.launchArguments = [
             "-ui-testing",
+            "-ApplePersistenceIgnoreState", "YES",
             "-AppleLanguages", "(en)",
             "-AppleLocale", "en_US"
         ]
         app.launch()
+        app.activate()
         return app
     }
 
     @MainActor
     private func element(_ identifier: String, in app: XCUIApplication) -> XCUIElement {
-        app.descendants(matching: .any)[identifier]
+        app.descendants(matching: .any).matching(identifier: identifier).firstMatch
+    }
+
+    @MainActor
+    private func waitForAny(_ identifiers: [String], in app: XCUIApplication, timeout: TimeInterval) -> Bool {
+        let end = Date().addingTimeInterval(timeout)
+        repeat {
+            if identifiers.contains(where: { element($0, in: app).exists }) {
+                return true
+            }
+        } while Date() < end && RunLoop.current.run(mode: .default, before: Date().addingTimeInterval(0.2))
+        return identifiers.contains(where: { element($0, in: app).exists })
     }
 
     #if os(macOS)

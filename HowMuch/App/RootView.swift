@@ -55,6 +55,7 @@ struct DataLockedView: View {
         }
         .padding(24)
         .frame(maxWidth: .infinity, maxHeight: .infinity)
+        .accessibilityIdentifier("app.locked")
     }
 }
 
@@ -150,6 +151,8 @@ private struct LoadedRootView: View {
             }
         }
         #endif
+        .accessibilityElement(children: .contain)
+        .accessibilityIdentifier("app.loaded")
         #if os(macOS)
         .sheet(isPresented: Bindable(appState).presentingSettings) {
             SettingsView()

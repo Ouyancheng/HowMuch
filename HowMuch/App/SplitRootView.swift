@@ -11,9 +11,10 @@ struct SplitRootView: View {
         animation: .default
     )
     private var ledgers: FetchedResults<Ledger>
+    @State private var columnVisibility = NavigationSplitViewVisibility.all
 
     var body: some View {
-        NavigationSplitView {
+        NavigationSplitView(columnVisibility: $columnVisibility) {
             LedgerSidebar(ledgers: Array(ledgers))
                 .navigationSplitViewColumnWidth(min: 180, ideal: 230, max: 300)
                 .frame(minHeight: 0, maxHeight: .infinity)

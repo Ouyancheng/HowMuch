@@ -16,7 +16,7 @@ struct HowMuchApp: App {
     @State private var accountMonitor = CloudKitAccountMonitor()
 
     var body: some Scene {
-        WindowGroup(id: "howmuch.main.v5") {
+        WindowGroup {
             RootView()
                 .environment(\.managedObjectContext, persistence.viewContext)
                 .environmentObject(persistence)
@@ -56,6 +56,7 @@ struct HowMuchApp: App {
         .defaultSize(width: 920, height: 560)
         .windowResizability(.automatic)
         .windowIdealSize(.automatic)
+        .defaultLaunchBehavior(.presented)
         .commands {
             HowMuchCommands()
         }
@@ -76,6 +77,7 @@ struct HowMuchApp: App {
         .defaultSize(width: 480, height: 460)
         .windowResizability(.automatic)
         .windowToolbarStyle(.unified)
+        .defaultLaunchBehavior(.suppressed)
 
         WindowGroup(id: HowMuchWindowID.editExpense, for: UUID.self) { $expenseID in
             DataAvailabilityGate {
@@ -91,6 +93,7 @@ struct HowMuchApp: App {
         .defaultSize(width: 480, height: 460)
         .windowResizability(.automatic)
         .windowToolbarStyle(.unified)
+        .defaultLaunchBehavior(.suppressed)
 
         WindowGroup(id: HowMuchWindowID.ledgerSettings, for: UUID.self) { $ledgerID in
             DataAvailabilityGate {
@@ -107,6 +110,7 @@ struct HowMuchApp: App {
         .defaultSize(width: 440, height: 400)
         .windowResizability(.automatic)
         .windowToolbarStyle(.unified)
+        .defaultLaunchBehavior(.suppressed)
 
         WindowGroup(id: HowMuchWindowID.newPersonal) {
             DataAvailabilityGate {
@@ -123,6 +127,7 @@ struct HowMuchApp: App {
         .defaultSize(width: 420, height: 280)
         .windowResizability(.automatic)
         .windowToolbarStyle(.unified)
+        .defaultLaunchBehavior(.suppressed)
 
         WindowGroup(id: HowMuchWindowID.newHousehold) {
             DataAvailabilityGate {
@@ -139,6 +144,7 @@ struct HowMuchApp: App {
         .defaultSize(width: 420, height: 280)
         .windowResizability(.automatic)
         .windowToolbarStyle(.unified)
+        .defaultLaunchBehavior(.suppressed)
         #endif
 
         #if os(macOS)
