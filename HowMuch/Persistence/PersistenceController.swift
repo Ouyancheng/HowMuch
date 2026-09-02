@@ -132,6 +132,10 @@ final class PersistenceController: ObservableObject {
         ProcessInfo.processInfo.arguments.contains("-ui-testing")
     }
 
+    static var isCapturingScreenshots: Bool {
+        ProcessInfo.processInfo.arguments.contains("-ui-screenshots")
+    }
+
     private(set) var container: NSPersistentContainer
     var persistentCloudKitContainer: NSPersistentCloudKitContainer? {
         container as? NSPersistentCloudKitContainer

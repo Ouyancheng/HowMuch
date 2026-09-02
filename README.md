@@ -2,6 +2,21 @@
 
 HowMuch is a personal and household spend tracker for iPhone and Mac. It records the amount consumed, the amount actually charged, and reporting figures for each ledger.
 
+<p align="center">
+  <img src="docs/screenshots/iphone-activity.png" width="200" alt="Activity list on iPhone">
+  <img src="docs/screenshots/iphone-insights.png" width="200" alt="Insights on iPhone">
+  <img src="docs/screenshots/iphone-ledgers.png" width="200" alt="Personal and family ledgers on iPhone">
+  <img src="docs/screenshots/iphone-expense.png" width="200" alt="Expense editor on iPhone">
+</p>
+
+<p align="center">
+  <img src="docs/screenshots/ipad-split.png" width="820" alt="Ledgers, activity, and insights on iPad">
+</p>
+
+<p align="center">
+  <img src="docs/screenshots/macos-main.png" width="820" alt="HowMuch on Mac">
+</p>
+
 ## Data, privacy, and sharing
 
 - Personal ledgers live in the user's private CloudKit database. Family ledgers use a shared CloudKit database and can be invited through the system share sheet; this is not Apple Family Sharing.
@@ -60,6 +75,8 @@ Scripts/check-entitlements.sh archive /path/to/HowMuch.xcarchive
 The GitHub workflow uses the `macos-26` runner and selects its newest installed Xcode without an Xcode setup action. If that runner is unavailable for a repository, run `Scripts/ci.sh` on a self-hosted macOS runner with Xcode 26+.
 
 `-ui-testing` launches an in-memory, sample-data stack and does not initialize CloudKit. UI tests are skipped in the normal macOS unit test action. The iOS accessibility audit is compiled and run only on supported iOS test destinations.
+
+`Scripts/capture-screenshots.sh` rebuilds the README gallery from the iPhone, iPad, and Mac UI.
 
 ## Manual release checklist
 

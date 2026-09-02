@@ -186,7 +186,10 @@ struct ActivityView: View {
     }
 
     private var showsiCloudBanner: Bool {
-        accountMonitor.shouldShowBanner
+        guard !PersistenceController.isUITesting, !PersistenceController.isCapturingScreenshots else {
+            return false
+        }
+        return accountMonitor.shouldShowBanner
             || (!persistence.cloudKitEnabled && !accountMonitor.isDetermining)
             || persistence.shareError != nil
     }

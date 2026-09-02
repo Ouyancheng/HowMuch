@@ -59,6 +59,12 @@ extension PersistenceController {
             kind: .personal,
             reportingCurrency: "HKD"
         )
+        _ = createLedger(
+            name: String(localized: "Household", comment: "Sample family ledger name"),
+            kind: .household,
+            reportingCurrency: "HKD"
+        )
+
         let alipay = PaymentMethod(context: viewContext)
         alipay.name = "HKD Alipay"
         alipay.kind = PaymentKind.alipay.rawValue
@@ -71,38 +77,120 @@ extension PersistenceController {
         usdCard.billingCurrency = "USD"
         usdCard.ledger = ledger
 
-        let dining = ledger.activeCategories.first { $0.wrappedName == String(localized: "Dining", comment: "Default category") }
-            ?? ledger.activeCategories.first
-        let transport = ledger.activeCategories.first { $0.wrappedName == String(localized: "Transport", comment: "Default category") }
-            ?? ledger.activeCategories.last
+        let cash = ledger.activePaymentMethods.first { $0.kind == PaymentKind.cash.rawValue }
 
-        let dinner = Expense(context: viewContext)
-        dinner.merchant = "Din Tai Fung"
-        dinner.note = "Family dinner"
-        dinner.occurredAt = Date().addingTimeInterval(-86_400)
-        dinner.spendAmount = NSDecimalNumber(value: 88)
-        dinner.spendCurrency = "CNY"
-        dinner.chargedAmount = NSDecimalNumber(value: 96.5)
-        dinner.chargedCurrency = "HKD"
-        dinner.reportingAmount = NSDecimalNumber(value: 96.5)
-        dinner.reportingCurrency = "HKD"
-        dinner.ledger = ledger
-        dinner.category = dining
-        dinner.paymentMethod = alipay
+        func category(_ name: String) -> Category? {
+            ledger.activeCategories.first { $0.wrappedName == name }
+        }
 
-        let taxi = Expense(context: viewContext)
-        taxi.merchant = "Taxi"
-        taxi.occurredAt = Date().addingTimeInterval(-3_600)
-        taxi.spendAmount = NSDecimalNumber(value: 85)
-        taxi.spendCurrency = "HKD"
-        taxi.chargedAmount = NSDecimalNumber(value: 11.2)
-        taxi.chargedCurrency = "USD"
-        taxi.reportingAmount = NSDecimalNumber(value: 85)
-        taxi.reportingCurrency = "HKD"
-        taxi.ledger = ledger
-        taxi.category = transport
-        taxi.paymentMethod = usdCard
+        addSampleExpense(
+            merchant: "Din Tai Fung",
+            note: "Family dinner",
+            daysAgo: 1,
+            spend: 88,
+            spendCurrency: "CNY",
+            charged: 96.5,
+            chargedCurrency: "HKD",
+            reporting: 96.5,
+            ledger: ledger,
+            category: category(String(localized: "Dining", comment: "Default category")),
+            paymentMethod: alipay
+        )
+        addSampleExpense(
+            merchant: "Taxi",
+            daysAgo: 0,
+            spend: 85,
+            spendCurrency: "HKD",
+            charged: 11.2,
+            chargedCurrency: "USD",
+            reporting: 85,
+            ledger: ledger,
+            category: category(String(localized: "Transport", comment: "Default category")),
+            paymentMethod: usdCard
+        )
+        addSampleExpense(
+            merchant: "City'super",
+            daysAgo: 2,
+            spend: 246.8,
+            spendCurrency: "HKD",
+            reporting: 246.8,
+            ledger: ledger,
+            category: category(String(localized: "Groceries", comment: "Default category")),
+            paymentMethod: alipay
+        )
+        addSampleExpense(
+            merchant: "MTR",
+            daysAgo: 3,
+            spend: 18.4,
+            spendCurrency: "HKD",
+            reporting: 18.4,
+            ledger: ledger,
+            category: category(String(localized: "Transport", comment: "Default category")),
+            paymentMethod: cash
+        )
+        addSampleExpense(
+            merchant: "Uniqlo",
+            daysAgo: 4,
+            spend: 399,
+            spendCurrency: "HKD",
+            reporting: 399,
+            ledger: ledger,
+            category: category(String(localized: "Shopping", comment: "Default category")),
+            paymentMethod: alipay
+        )
+        addSampleExpense(
+            merchant: "Netflix",
+            daysAgo: 5,
+            spend: 17.99,
+            spendCurrency: "USD",
+            charged: 140.3,
+            chargedCurrency: "HKD",
+            reporting: 140.3,
+            ledger: ledger,
+            category: category(String(localized: "Subscriptions", comment: "Default category")),
+            paymentMethod: usdCard
+        )
 
         save()
+    }
+
+    private func addSampleExpense(
+        merchant: String,
+        note: String? = nil,
+        daysAgo: Int,
+        spend: Double,
+        spendCurrency: String,
+        charged: Double? = nil,
+        chargedCurrency: String? = nil,
+        reporting: Double,
+        ledger: Ledger,
+        category: Category?,
+        paymentMethod: PaymentMethod?
+    ) {
+        let expense = Expense(context: viewContext)
+        expense.merchant = merchant
+        expense.note = note
+        expense.occurredAt = Self.sampleDate(daysAgo: daysAgo)
+        expense.spendAmount = NSDecimalNumber(value: spend)
+        expense.spendCurrency = spendCurrency
+        expense.chargedAmount = NSDecimalNumber(value: charged ?? spend)
+        expense.chargedCurrency = chargedCurrency ?? spendCurrency
+        expense.reportingAmount = NSDecimalNumber(value: reporting)
+        expense.reportingCurrency = "HKD"
+        expense.ledger = ledger
+        expense.category = category
+        expense.paymentMethod = paymentMethod
+    }
+
+    private static func sampleDate(daysAgo: Int, now: Date = Date(), calendar: Calendar = .current) -> Date {
+        let startOfToday = calendar.startOfDay(for: now)
+        let candidate = calendar.date(byAdding: .day, value: -daysAgo, to: startOfToday) ?? now
+        if let monthStart = calendar.dateInterval(of: .month, for: now)?.start, candidate < monthStart {
+            return now.addingTimeInterval(-TimeInterval(max(daysAgo, 1) * 3600))
+        }
+        if daysAgo == 0 {
+            return now.addingTimeInterval(-3_600)
+        }
+        return candidate.addingTimeInterval(18 * 3600)
     }
 }
