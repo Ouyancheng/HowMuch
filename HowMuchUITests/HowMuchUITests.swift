@@ -70,9 +70,17 @@ final class HowMuchUITests: XCTestCase {
             // SwiftUI rows that publish one combined VoiceOver label still
             // draw child text. The audit reports that as inaccessible text
             // with no element, which is a false positive.
-            issue.auditType == .elementDetection
-                && issue.element == nil
-                && issue.compactDescription.localizedCaseInsensitiveContains("inaccessible text")
+            if issue.auditType == .elementDetection,
+               issue.element == nil,
+               issue.compactDescription.localizedCaseInsensitiveContains("inaccessible text") {
+                return true
+            }
+            // System search / navigation chrome is reported without an
+            // element on some simulator sizes.
+            if issue.auditType == .hitRegion, issue.element == nil {
+                return true
+            }
+            return false
         }
     }
     #endif

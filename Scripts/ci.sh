@@ -95,10 +95,22 @@ for runtime, devices in payload.get("devices", {}).items():
         device_type = device.get("deviceTypeIdentifier", "")
         if family not in device_type:
             continue
-        candidates.append((version, device.get("name", ""), device.get("udid", "")))
+        name = device.get("name", "")
+        lowered = name.lower()
+        if any(token in lowered for token in ("air", "mini", "iphone 16e", "iphone 17e")):
+            preference = 0
+        elif "pro" in lowered and "max" not in lowered:
+            preference = 4
+        elif "pro max" in lowered:
+            preference = 3
+        elif "plus" in lowered:
+            preference = 2
+        else:
+            preference = 1
+        candidates.append((version, preference, name, device.get("udid", "")))
 
 if candidates:
-    print(sorted(candidates, reverse=True)[0][2])
+    print(sorted(candidates, reverse=True)[0][3])
 ' "$family"
 }
 

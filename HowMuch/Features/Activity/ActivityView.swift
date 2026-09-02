@@ -111,7 +111,8 @@ struct ActivityView: View {
         } label: {
             Image(systemName: "plus")
                 .font(.title2.weight(.semibold))
-                .frame(minWidth: 22, minHeight: 22)
+                .frame(minWidth: 44, minHeight: 44)
+                .contentShape(Circle())
         }
         .hmGlassRoundProminentButton()
         .accessibilityLabel(String(localized: "New Expense", comment: "Toolbar"))
@@ -139,7 +140,8 @@ struct ActivityView: View {
         } label: {
             Image(systemName: "gearshape")
                 .font(.body.weight(.semibold))
-                .frame(minWidth: 22, minHeight: 22)
+                .frame(minWidth: 44, minHeight: 44)
+                .contentShape(Circle())
         }
         .accessibilityLabel(String(localized: "Settings", comment: "Toolbar"))
         .accessibilityIdentifier("split.settings")
