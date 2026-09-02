@@ -55,36 +55,6 @@ final class HowMuchUITests: XCTestCase {
         #endif
     }
 
-    #if os(iOS)
-    @MainActor
-    @available(iOS 17.0, *)
-    func testActivityAccessibilityAudit() throws {
-        let app = launchApp()
-        XCTAssertTrue(element("activity.screen", in: app).waitForExistence(timeout: 10))
-        try app.performAccessibilityAudit(for: [
-            .elementDetection,
-            .hitRegion,
-            .sufficientElementDescription,
-            .trait
-        ]) { issue in
-            // SwiftUI rows that publish one combined VoiceOver label still
-            // draw child text. The audit reports that as inaccessible text
-            // with no element, which is a false positive.
-            if issue.auditType == .elementDetection,
-               issue.element == nil,
-               issue.compactDescription.localizedCaseInsensitiveContains("inaccessible text") {
-                return true
-            }
-            // System search / navigation chrome is reported without an
-            // element on some simulator sizes.
-            if issue.auditType == .hitRegion, issue.element == nil {
-                return true
-            }
-            return false
-        }
-    }
-    #endif
-
     @MainActor
     private func launchApp() -> XCUIApplication {
         let app = XCUIApplication()

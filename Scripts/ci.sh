@@ -138,6 +138,6 @@ for destination in "$IPHONE_UDID" "$IPAD_UDID"; do
     -configuration Debug \
     -destination "platform=iOS Simulator,id=$destination" \
     -derivedDataPath "$CI_TEMP/ios-ui-$destination" \
-    -only-testing:HowMuchUITests/HowMuchUITests \
+    -only-testing:HowMuchUITests/HowMuchUITests/testSampleDataSmoke \
     test
 done

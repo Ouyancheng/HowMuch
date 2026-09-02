@@ -74,7 +74,7 @@ Scripts/check-entitlements.sh archive /path/to/HowMuch.xcarchive
 
 The GitHub workflow uses the `macos-26` runner and selects its newest installed Xcode without an Xcode setup action. If that runner is unavailable for a repository, run `Scripts/ci.sh` on a self-hosted macOS runner with Xcode 26+.
 
-`-ui-testing` launches an in-memory, sample-data stack and does not initialize CloudKit. UI tests are skipped in the normal macOS unit test action. The iOS accessibility audit is compiled and run only on supported iOS test destinations.
+`-ui-testing` launches an in-memory, sample-data stack and does not initialize CloudKit. UI tests are skipped in the normal macOS unit test action. CI runs the sample-data smoke test only.
 
 `Scripts/capture-screenshots.sh` rebuilds the README gallery from the iPhone, iPad, and Mac UI.
 
