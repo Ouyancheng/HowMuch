@@ -71,8 +71,8 @@ extension PersistenceController {
     func existingShare(for ledger: Ledger) -> CKShare? {
         guard cloudKitEnabled else { return nil }
         do {
-            let shares = try container.fetchShares(matching: [ledger.objectID])
-            return shares[ledger.objectID]
+            let shares = try persistentCloudKitContainer?.fetchShares(matching: [ledger.objectID])
+            return shares?[ledger.objectID]
         } catch {
             loggerForSharing.error("fetchShares failed: \(error.localizedDescription, privacy: .public)")
             return nil
@@ -129,7 +129,10 @@ extension PersistenceController {
         if let existing = existingShare(for: ledger) {
             return existing
         }
-        let (_, share, _) = try await container.share([ledger], to: nil)
+        guard let persistentCloudKitContainer else {
+            throw PersistenceShareError.cloudKitUnavailable
+        }
+        let (_, share, _) = try await persistentCloudKitContainer.share([ledger], to: nil)
         share[CKShare.SystemFieldKey.title] = ledger.wrappedName as CKRecordValue
         share.publicPermission = .none
         try await persist(share, for: ledger)
@@ -142,7 +145,11 @@ extension PersistenceController {
         }
         defer { invalidateLedgerAccess(for: ledger) }
         try await withCheckedThrowingContinuation { (continuation: CheckedContinuation<Void, Error>) in
-            container.persistUpdatedShare(share, in: store) { _, error in
+            guard let persistentCloudKitContainer else {
+                continuation.resume(throwing: PersistenceShareError.cloudKitUnavailable)
+                return
+            }
+            persistentCloudKitContainer.persistUpdatedShare(share, in: store) { _, error in
                 if let error {
                     continuation.resume(throwing: error)
                 } else {
@@ -176,7 +183,14 @@ extension PersistenceController {
         }
 
         shareError = nil
-        container.acceptShareInvitations(from: [metadata], into: sharedStore) { _, error in
+        guard let persistentCloudKitContainer else {
+            shareError = String(
+                localized: "This invitation is waiting for iCloud sharing to become available.",
+                comment: "Share acceptance error"
+            )
+            return
+        }
+        persistentCloudKitContainer.acceptShareInvitations(from: [metadata], into: sharedStore) { _, error in
             Task { @MainActor in
                 if let error {
                     let nsError = error as NSError
@@ -507,7 +521,10 @@ extension PersistenceController {
 
         let share: CKShare
         do {
-            let shares = try container.fetchShares(matching: [ledger.objectID])
+            guard let persistentCloudKitContainer else {
+                throw PersistenceShareError.cloudKitUnavailable
+            }
+            let shares = try persistentCloudKitContainer.fetchShares(matching: [ledger.objectID])
             guard let fetchedShare = shares[ledger.objectID] else {
                 throw PersistenceShareError.shareNotFound
             }
@@ -611,10 +628,10 @@ extension PersistenceController {
     }
 
     private func currentZoneID(for ledger: Ledger) -> CKRecordZone.ID? {
-        if let recordID = container.recordID(for: ledger.objectID) {
+        if let recordID = persistentCloudKitContainer?.recordID(for: ledger.objectID) {
             return recordID.zoneID
         }
-        return try? container.fetchShares(matching: [ledger.objectID])[ledger.objectID]?.recordID.zoneID
+        return try? persistentCloudKitContainer?.fetchShares(matching: [ledger.objectID])[ledger.objectID]?.recordID.zoneID
     }
 
     private func restoredRetainedLedgerID(
@@ -695,7 +712,11 @@ extension PersistenceController {
 
     private func purge(zoneID: CKRecordZone.ID, from store: NSPersistentStore) async throws {
         try await withCheckedThrowingContinuation { (continuation: CheckedContinuation<Void, Error>) in
-            container.purgeObjectsAndRecordsInZone(with: zoneID, in: store) { _, error in
+            guard let persistentCloudKitContainer else {
+                continuation.resume(throwing: PersistenceShareError.cloudKitUnavailable)
+                return
+            }
+            persistentCloudKitContainer.purgeObjectsAndRecordsInZone(with: zoneID, in: store) { _, error in
                 if let error {
                     continuation.resume(throwing: error)
                 } else {

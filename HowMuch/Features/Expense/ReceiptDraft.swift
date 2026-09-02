@@ -150,7 +150,11 @@ enum ReceiptPreviewFiles {
         let url = directoryURL
             .appendingPathComponent("receipt-\(id.uuidString)", isDirectory: false)
             .appendingPathExtension(pathExtension)
-        try data.write(to: url, options: [.atomic, .completeFileProtectionUnlessOpen])
+        #if os(iOS)
+        try data.write(to: url, options: [.atomic, .completeFileProtectionUntilFirstUserAuthentication])
+        #else
+        try data.write(to: url, options: .atomic)
+        #endif
         try? FileManager.default.setAttributes([.modificationDate: now], ofItemAtPath: url.path)
         return url
     }

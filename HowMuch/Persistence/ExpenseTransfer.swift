@@ -458,7 +458,7 @@ extension PersistenceController {
         // ledger ownership and store checks performed by the caller.
         let zones = objects.compactMap { object -> CKRecordZone.ID? in
             guard !object.objectID.isTemporaryID else { return nil }
-            return container.recordID(for: object.objectID)?.zoneID
+            return persistentCloudKitContainer?.recordID(for: object.objectID)?.zoneID
         }
         return zones.isEmpty || zones.allSatisfy { $0 == zones[0] }
     }

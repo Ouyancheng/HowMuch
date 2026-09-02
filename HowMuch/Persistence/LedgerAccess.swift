@@ -179,8 +179,11 @@ extension PersistenceController {
             return isSharedStore ? .unknown : .unsharedOwner
         }
 
+        guard let persistentCloudKitContainer else {
+            return isSharedStore ? .unknown : .unsharedOwner
+        }
         do {
-            let shares = try container.fetchShares(matching: [ledger.objectID])
+            let shares = try persistentCloudKitContainer.fetchShares(matching: [ledger.objectID])
             guard let share = shares[ledger.objectID] else {
                 return isSharedStore ? .unknown : .unsharedOwner
             }

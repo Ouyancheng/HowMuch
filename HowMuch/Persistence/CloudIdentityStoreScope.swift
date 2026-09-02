@@ -40,6 +40,7 @@ enum CloudStoreScope {
     static let localAdoptionMarkerName = ".legacy-private-adopted-v1"
     static let baseAdoptionClaimName = ".legacy-private-adoption-claim-v1"
     static let adoptionIntentName = ".legacy-private-adoption-in-progress-v1"
+    static let inodeRewriteMarkerSuffix = ".inodes-rewritten-v1"
 
     static func locations(baseDirectory: URL, fingerprint: String) -> ScopedStoreLocations {
         let directory = baseDirectory
@@ -69,12 +70,18 @@ enum CloudStoreScope {
         fileManager: FileManager = .default
     ) throws -> LocalStoreLocations {
         let locations = localLocations(baseDirectory: baseDirectory)
-        guard !fileManager.fileExists(atPath: locations.adoptionMarker.path) else {
+        let legacyPrivate = baseDirectory.appendingPathComponent("private.sqlite")
+        if fileManager.fileExists(atPath: locations.adoptionMarker.path) {
+            try finishStoreLocation(
+                source: fileManager.fileExists(atPath: legacyPrivate.path) ? legacyPrivate : nil,
+                destination: locations.privateStore,
+                baseDirectory: baseDirectory,
+                fileManager: fileManager
+            )
             return locations
         }
         try fileManager.createDirectory(at: locations.directory, withIntermediateDirectories: true)
 
-        let legacyPrivate = baseDirectory.appendingPathComponent("private.sqlite")
         if fileManager.fileExists(atPath: legacyPrivate.path) {
             try adoptSQLiteFamily(
                 from: legacyPrivate,
@@ -82,7 +89,13 @@ enum CloudStoreScope {
                 fileManager: fileManager
             )
         }
-        try Data().write(to: locations.adoptionMarker, options: .atomic)
+        try Data().write(to: locations.adoptionMarker, options: atomicWriteOptions)
+        try finishStoreLocation(
+            source: fileManager.fileExists(atPath: legacyPrivate.path) ? legacyPrivate : nil,
+            destination: locations.privateStore,
+            baseDirectory: baseDirectory,
+            fileManager: fileManager
+        )
         return locations
     }
 
@@ -96,18 +109,25 @@ enum CloudStoreScope {
         fileManager: FileManager = .default
     ) throws {
         let locations = locations(baseDirectory: baseDirectory, fingerprint: fingerprint)
-        guard !fileManager.fileExists(atPath: locations.adoptionMarker.path) else { return }
-
-        try fileManager.createDirectory(
-            at: locations.directory,
-            withIntermediateDirectories: true
-        )
-
         let localPrivate = localLocations(baseDirectory: baseDirectory).privateStore
         let legacyPrivate = baseDirectory.appendingPathComponent("private.sqlite")
         let privateSource = fileManager.fileExists(atPath: localPrivate.path)
             ? localPrivate
             : legacyPrivate
+        if fileManager.fileExists(atPath: locations.adoptionMarker.path) {
+            try finishStoreLocation(
+                source: fileManager.fileExists(atPath: privateSource.path) ? privateSource : nil,
+                destination: locations.privateStore,
+                baseDirectory: baseDirectory,
+                fileManager: fileManager
+            )
+            return
+        }
+
+        try fileManager.createDirectory(
+            at: locations.directory,
+            withIntermediateDirectories: true
+        )
 
         if fileManager.fileExists(atPath: privateSource.path) {
             let claim = try claimLegacyPrivateAdoption(
@@ -126,7 +146,7 @@ enum CloudStoreScope {
                     throw CocoaError(.fileWriteFileExists)
                 }
                 if !fileManager.fileExists(atPath: intentURL.path) {
-                    try Data().write(to: intentURL, options: .atomic)
+                    try Data().write(to: intentURL, options: atomicWriteOptions)
                 }
                 try adoptSQLiteFamily(
                     from: privateSource,
@@ -144,7 +164,275 @@ enum CloudStoreScope {
             }
         }
 
-        try Data().write(to: locations.adoptionMarker, options: .atomic)
+        try Data().write(to: locations.adoptionMarker, options: atomicWriteOptions)
+        try finishStoreLocation(
+            source: fileManager.fileExists(atPath: privateSource.path) ? privateSource : nil,
+            destination: locations.privateStore,
+            baseDirectory: baseDirectory,
+            fileManager: fileManager
+        )
+    }
+
+    /// Core Data and SQLite sidecar writes fail with NSCocoaErrorDomain 513
+    /// on both iOS and macOS when a copied store, WAL, `_SUPPORT` tree, or
+    /// Core Data default directory is not writable.
+    static func ensureWritableDirectory(
+        _ directoryURL: URL,
+        fileManager: FileManager = .default
+    ) throws {
+        try fileManager.createDirectory(at: directoryURL, withIntermediateDirectories: true)
+        try? makeWritable(directoryURL, directory: true, fileManager: fileManager)
+    }
+
+    static func ensureWritableStoreLocation(
+        _ storeURL: URL,
+        fileManager: FileManager = .default,
+        allowRewrite: Bool = true
+    ) throws {
+        let store = storeURL.standardizedFileURL
+        let directory = store.deletingLastPathComponent()
+        try ensureWritableDirectory(directory, fileManager: fileManager)
+
+        let support = supportDirectory(for: store)
+        let externalData = support.appendingPathComponent("_EXTERNAL_DATA", isDirectory: true)
+        try fileManager.createDirectory(at: externalData, withIntermediateDirectories: true)
+        try? makeWritableTree(at: support, fileManager: fileManager)
+
+        let family = sqliteFamily(for: store).filter { fileManager.fileExists(atPath: $0.path) }
+        for member in family {
+            try? makeWritable(member, directory: false, fileManager: fileManager)
+        }
+        let rewriteMarker = URL(fileURLWithPath: store.path + inodeRewriteMarkerSuffix)
+        let alreadyRewritten = fileManager.fileExists(atPath: rewriteMarker.path)
+        // Unconditional rewrite uses Data.write. On iOS that can apply
+        // complete file protection and later saves fail with 513.
+        let mustRewrite = family.contains(where: { !canOpenForUpdating($0) })
+        #if os(iOS)
+        let shouldRewrite = allowRewrite && mustRewrite
+        #else
+        let shouldRewrite = allowRewrite && (!alreadyRewritten || mustRewrite)
+        #endif
+        if shouldRewrite {
+            for member in family {
+                try recreateFileWithoutInheritedMetadata(member, fileManager: fileManager)
+            }
+            try? recreateRestrictedFiles(in: support, fileManager: fileManager, force: true)
+            try Data().write(to: rewriteMarker, options: atomicWriteOptions)
+        } else if allowRewrite {
+            try? recreateRestrictedFiles(in: support, fileManager: fileManager, force: false)
+            if !alreadyRewritten {
+                try Data().write(to: rewriteMarker, options: atomicWriteOptions)
+            }
+        }
+    }
+
+    static func supportDirectory(for storeURL: URL) -> URL {
+        URL(fileURLWithPath: storeURL.path + "_SUPPORT", isDirectory: true)
+    }
+
+    private static func finishStoreLocation(
+        source: URL?,
+        destination: URL,
+        baseDirectory: URL,
+        fileManager: FileManager
+    ) throws {
+        if let source, fileManager.fileExists(atPath: source.path) {
+            try adoptSupportDirectory(from: source, to: destination, fileManager: fileManager)
+        }
+        try repairExternalBinaryStorage(
+            for: destination,
+            baseDirectory: baseDirectory,
+            fileManager: fileManager
+        )
+        try ensureWritableStoreLocation(destination, fileManager: fileManager)
+    }
+
+    /// Receipts use `allowsExternalBinaryDataStorage`. The UUID lives in sqlite;
+    /// the bytes live in `*_SUPPORT/_EXTERNAL_DATA`. A store copy that misses
+    /// `.private_SUPPORT` or `private.sqlite_SUPPORT` makes later saves fail
+    /// with NSCocoaErrorDomain 513.
+    static func repairExternalBinaryStorage(
+        for storeURL: URL,
+        baseDirectory: URL,
+        fileManager: FileManager = .default
+    ) throws {
+        let destinationExternal = supportDirectory(for: storeURL)
+            .appendingPathComponent("_EXTERNAL_DATA", isDirectory: true)
+        try fileManager.createDirectory(at: destinationExternal, withIntermediateDirectories: true)
+
+        let candidates = [
+            supportDirectory(for: storeURL),
+            supportDirectory(for: baseDirectory.appendingPathComponent("private.sqlite")),
+            supportDirectory(for: localLocations(baseDirectory: baseDirectory).privateStore),
+            baseDirectory.appendingPathComponent(".private_SUPPORT", isDirectory: true),
+            storeURL.deletingLastPathComponent()
+                .appendingPathComponent(".private_SUPPORT", isDirectory: true)
+        ]
+        var seen = Set<String>()
+        for support in candidates {
+            let path = support.standardizedFileURL.path
+            guard seen.insert(path).inserted else { continue }
+            let sourceExternal = support.appendingPathComponent("_EXTERNAL_DATA", isDirectory: true)
+            guard fileManager.fileExists(atPath: sourceExternal.path) else { continue }
+            let files = (try? fileManager.contentsOfDirectory(
+                at: sourceExternal,
+                includingPropertiesForKeys: nil
+            )) ?? []
+            for file in files {
+                let destination = destinationExternal.appendingPathComponent(file.lastPathComponent)
+                guard !fileManager.fileExists(atPath: destination.path) else { continue }
+                try copyFileReplacingMetadata(from: file, to: destination)
+            }
+        }
+    }
+
+    private static func adoptSupportDirectory(
+        from sourceStore: URL,
+        to destinationStore: URL,
+        fileManager: FileManager
+    ) throws {
+        let sourceSupport = supportDirectory(for: sourceStore)
+        let destinationSupport = supportDirectory(for: destinationStore)
+        guard fileManager.fileExists(atPath: sourceSupport.path) else { return }
+        if fileManager.fileExists(atPath: destinationSupport.path) {
+            if !isEmptySupportDirectory(destinationSupport, fileManager: fileManager) {
+                return
+            }
+            try fileManager.removeItem(at: destinationSupport)
+        }
+        try copyDirectoryReplacingMetadata(
+            from: sourceSupport,
+            to: destinationSupport,
+            fileManager: fileManager
+        )
+    }
+
+    private static func copyDirectoryReplacingMetadata(
+        from source: URL,
+        to destination: URL,
+        fileManager: FileManager
+    ) throws {
+        try fileManager.createDirectory(at: destination, withIntermediateDirectories: true)
+        let children = try fileManager.contentsOfDirectory(
+            at: source,
+            includingPropertiesForKeys: [.isDirectoryKey],
+            options: []
+        )
+        for child in children {
+            let destChild = destination.appendingPathComponent(child.lastPathComponent)
+            var isDirectory: ObjCBool = false
+            fileManager.fileExists(atPath: child.path, isDirectory: &isDirectory)
+            if isDirectory.boolValue {
+                try copyDirectoryReplacingMetadata(
+                    from: child,
+                    to: destChild,
+                    fileManager: fileManager
+                )
+            } else {
+                try copyFileReplacingMetadata(from: child, to: destChild)
+            }
+        }
+    }
+
+    private static var atomicWriteOptions: Data.WritingOptions {
+        #if os(iOS)
+        [.atomic, .noFileProtection]
+        #else
+        [.atomic]
+        #endif
+    }
+
+    private static func copyFileReplacingMetadata(from source: URL, to destination: URL) throws {
+        let data = try Data(contentsOf: source, options: [.mappedIfSafe])
+        try data.write(to: destination, options: atomicWriteOptions)
+    }
+
+    /// `access(W_OK)` ignores sandbox provenance/quarantine. Opening the file
+    /// for updating is what Core Data does on save.
+    static func canOpenForUpdating(_ url: URL) -> Bool {
+        do {
+            let handle = try FileHandle(forUpdating: url)
+            try handle.close()
+            return true
+        } catch {
+            return false
+        }
+    }
+
+    private static func recreateFileWithoutInheritedMetadata(
+        _ url: URL,
+        fileManager: FileManager
+    ) throws {
+        guard fileManager.fileExists(atPath: url.path) else { return }
+        try? fileManager.setAttributes([.immutable: false], ofItemAtPath: url.path)
+        let data = try Data(contentsOf: url, options: [.mappedIfSafe])
+        let staging = url.deletingLastPathComponent()
+            .appendingPathComponent(".rewrite-\(UUID().uuidString)")
+        try data.write(to: staging, options: atomicWriteOptions)
+        defer { try? fileManager.removeItem(at: staging) }
+        try fileManager.removeItem(at: url)
+        try fileManager.moveItem(at: staging, to: url)
+        try? makeWritable(url, directory: false, fileManager: fileManager)
+    }
+
+    private static func recreateRestrictedFiles(
+        in directory: URL,
+        fileManager: FileManager,
+        force: Bool
+    ) throws {
+        var isDirectory: ObjCBool = false
+        guard fileManager.fileExists(atPath: directory.path, isDirectory: &isDirectory),
+              isDirectory.boolValue else { return }
+        let children = try fileManager.contentsOfDirectory(
+            at: directory,
+            includingPropertiesForKeys: [.isDirectoryKey],
+            options: []
+        )
+        for child in children {
+            var childIsDirectory: ObjCBool = false
+            fileManager.fileExists(atPath: child.path, isDirectory: &childIsDirectory)
+            if childIsDirectory.boolValue {
+                try recreateRestrictedFiles(in: child, fileManager: fileManager, force: force)
+            } else if force || !canOpenForUpdating(child) {
+                try recreateFileWithoutInheritedMetadata(child, fileManager: fileManager)
+            }
+        }
+    }
+
+    private static func isEmptySupportDirectory(_ url: URL, fileManager: FileManager) -> Bool {
+        let externalData = url.appendingPathComponent("_EXTERNAL_DATA", isDirectory: true)
+        let contents = (try? fileManager.contentsOfDirectory(atPath: externalData.path)) ?? []
+        return contents.isEmpty
+    }
+
+    private static func makeWritableTree(at url: URL, fileManager: FileManager) throws {
+        var isDirectory: ObjCBool = false
+        guard fileManager.fileExists(atPath: url.path, isDirectory: &isDirectory) else { return }
+        try makeWritable(url, directory: isDirectory.boolValue, fileManager: fileManager)
+        guard isDirectory.boolValue else { return }
+        let children = try fileManager.contentsOfDirectory(
+            at: url,
+            includingPropertiesForKeys: [.isDirectoryKey],
+            options: [.skipsPackageDescendants]
+        )
+        for child in children {
+            try? makeWritableTree(at: child, fileManager: fileManager)
+        }
+    }
+
+    private static func makeWritable(
+        _ url: URL,
+        directory: Bool,
+        fileManager: FileManager
+    ) throws {
+        guard fileManager.fileExists(atPath: url.path) else { return }
+        try fileManager.setAttributes(
+            [
+                .immutable: false,
+                .posixPermissions: directory ? 0o755 : 0o644
+            ],
+            ofItemAtPath: url.path
+        )
     }
 
     static func sqliteFamily(for storeURL: URL) -> [URL] {
@@ -176,6 +464,10 @@ enum CloudStoreScope {
                         try fileManager.removeItem(at: member)
                     }
                 }
+                let destinationSupport = supportDirectory(for: destination)
+                if fileManager.fileExists(atPath: destinationSupport.path) {
+                    try fileManager.removeItem(at: destinationSupport)
+                }
                 return try adoptSQLiteFamily(
                     from: source,
                     to: destination,
@@ -183,6 +475,7 @@ enum CloudStoreScope {
                     fileManager: fileManager
                 )
             }
+            try adoptSupportDirectory(from: source, to: destination, fileManager: fileManager)
             return
         }
 
@@ -202,7 +495,7 @@ enum CloudStoreScope {
         for (index, sourceMember) in sourceFamily.enumerated()
         where fileManager.fileExists(atPath: sourceMember.path) {
             let staged = stagingDirectory.appendingPathComponent(destinationFamily[index].lastPathComponent)
-            try fileManager.copyItem(at: sourceMember, to: staged)
+            try copyFileReplacingMetadata(from: sourceMember, to: staged)
         }
 
         var promoted: [URL] = []
@@ -214,10 +507,15 @@ enum CloudStoreScope {
                     promoted.append(destinationMember)
                 }
             }
-            try Data().write(to: completionMarker, options: .atomic)
+            try Data().write(to: completionMarker, options: atomicWriteOptions)
+            try adoptSupportDirectory(from: source, to: destination, fileManager: fileManager)
         } catch {
             for member in promoted {
                 try? fileManager.removeItem(at: member)
+            }
+            let destinationSupport = supportDirectory(for: destination)
+            if fileManager.fileExists(atPath: destinationSupport.path) {
+                try? fileManager.removeItem(at: destinationSupport)
             }
             throw error
         }
@@ -242,7 +540,7 @@ enum CloudStoreScope {
         let stagedClaim = baseDirectory.appendingPathComponent(
             ".legacy-private-claim-\(UUID().uuidString)"
         )
-        try data.write(to: stagedClaim, options: .atomic)
+        try data.write(to: stagedClaim, options: atomicWriteOptions)
         defer { try? fileManager.removeItem(at: stagedClaim) }
         do {
             // A hard link publishes the complete staged bytes in one

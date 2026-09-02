@@ -1134,6 +1134,7 @@ final class PersistenceTests: XCTestCase {
         XCTAssertTrue(persistence.isDataAvailable)
         XCTAssertTrue(persistence.isLocalOnly)
         XCTAssertFalse(persistence.cloudKitEnabled)
+        XCTAssertFalse(persistence.container is NSPersistentCloudKitContainer)
         XCTAssertNil(persistence.sharedStore)
         XCTAssertEqual(
             persistence.privateStore?.url,
@@ -1154,6 +1155,172 @@ final class PersistenceTests: XCTestCase {
         await persistence.applyAccountIdentity(.unavailable("restricted"))
         XCTAssertTrue(persistence.isDataAvailable)
         XCTAssertFalse(persistence.cloudKitEnabled)
+        XCTAssertFalse(persistence.container is NSPersistentCloudKitContainer)
+        let ledger = try XCTUnwrap(try persistence.viewContext.fetch(Ledger.fetchRequest()).first)
+        _ = try persistence.saveExpense(
+            nil,
+            to: ledger,
+            category: ledger.activeCategories[0],
+            paymentMethod: ledger.activePaymentMethods[0],
+            values: ExpenseEditValues(
+                merchant: "Cafe",
+                note: "",
+                occurredAt: Date(),
+                spendAmount: 4,
+                spendCurrency: "USD",
+                chargedAmount: 4,
+                chargedCurrency: "USD",
+                reportingAmount: 4,
+                reportingCurrency: "USD",
+                receiptData: nil,
+                receiptFileName: nil,
+                receiptContentType: nil
+            )
+        )
+    }
+
+    func testEnsureWritableStoreLocationClearsImmutableFlag() throws {
+        let fileManager = FileManager.default
+        let directory = fileManager.temporaryDirectory
+            .appendingPathComponent("HowMuchWritableStore-\(UUID().uuidString)", isDirectory: true)
+        try fileManager.createDirectory(at: directory, withIntermediateDirectories: true)
+        defer { try? fileManager.removeItem(at: directory) }
+
+        let store = directory.appendingPathComponent("private.sqlite")
+        try Data("store".utf8).write(to: store)
+        try fileManager.setAttributes([.immutable: true], ofItemAtPath: store.path)
+        let supportBlob = URL(fileURLWithPath: store.path + "_SUPPORT/_EXTERNAL_DATA/blob")
+        try fileManager.createDirectory(
+            at: supportBlob.deletingLastPathComponent(),
+            withIntermediateDirectories: true
+        )
+        try Data("blob".utf8).write(to: supportBlob)
+        try fileManager.setAttributes([.immutable: true], ofItemAtPath: supportBlob.path)
+        try fileManager.setAttributes(
+            [.immutable: true],
+            ofItemAtPath: supportBlob.deletingLastPathComponent().path
+        )
+
+        try CloudStoreScope.ensureWritableStoreLocation(store, fileManager: fileManager)
+
+        let attributes = try fileManager.attributesOfItem(atPath: store.path)
+        XCTAssertEqual(attributes[.immutable] as? Bool, false)
+        XCTAssertEqual(
+            try fileManager.attributesOfItem(atPath: supportBlob.path)[.immutable] as? Bool,
+            false
+        )
+        try Data("rewritten".utf8).write(to: store, options: .atomic)
+        try Data("updated".utf8).write(to: supportBlob, options: .atomic)
+    }
+
+    func testEnsureWritableStoreLocationRecreatesFilesThatCannotBeOpenedForUpdate() throws {
+        let fileManager = FileManager.default
+        let directory = fileManager.temporaryDirectory
+            .appendingPathComponent("HowMuchRewriteStore-\(UUID().uuidString)", isDirectory: true)
+        try fileManager.createDirectory(at: directory, withIntermediateDirectories: true)
+        defer { try? fileManager.removeItem(at: directory) }
+
+        let store = directory.appendingPathComponent("private.sqlite")
+        try Data("store".utf8).write(to: store)
+        try fileManager.setAttributes([.posixPermissions: 0o444], ofItemAtPath: store.path)
+        XCTAssertFalse(CloudStoreScope.canOpenForUpdating(store))
+
+        try CloudStoreScope.ensureWritableStoreLocation(store, fileManager: fileManager)
+
+        XCTAssertTrue(CloudStoreScope.canOpenForUpdating(store))
+        let handle = try FileHandle(forUpdating: store)
+        try handle.close()
+        try Data("rewritten".utf8).write(to: store, options: .atomic)
+    }
+
+    func testDiskLocalStoreCanSaveExpenseWithExternalReceipt() throws {
+        let fileManager = FileManager.default
+        let base = fileManager.temporaryDirectory
+            .appendingPathComponent("HowMuchReceiptWrite-\(UUID().uuidString)", isDirectory: true)
+        defer { try? fileManager.removeItem(at: base) }
+
+        let persistence = PersistenceController.makeLocalTestStack(
+            applicationSupportDirectory: base
+        )
+        let ledger = try XCTUnwrap(try persistence.viewContext.fetch(Ledger.fetchRequest()).first)
+        let receipt = Data(repeating: 0xAB, count: 1_500_000)
+        let expense = try persistence.saveExpense(
+            nil,
+            to: ledger,
+            category: ledger.activeCategories[0],
+            paymentMethod: ledger.activePaymentMethods[0],
+            values: ExpenseEditValues(
+                merchant: "Market",
+                note: "",
+                occurredAt: Date(),
+                spendAmount: 10,
+                spendCurrency: "USD",
+                chargedAmount: 10,
+                chargedCurrency: "USD",
+                reportingAmount: 10,
+                reportingCurrency: "USD",
+                receiptData: receipt,
+                receiptFileName: "receipt.jpg",
+                receiptContentType: "public.jpeg"
+            )
+        )
+        XCTAssertEqual(expense.receiptData?.count, receipt.count)
+    }
+
+    func testLocalStoreRemainsWritableAfterItWasOpenedWithHistoryTracking() throws {
+        let fileManager = FileManager.default
+        let base = fileManager.temporaryDirectory
+            .appendingPathComponent("HowMuchHistoryReadonly-\(UUID().uuidString)", isDirectory: true)
+        try fileManager.createDirectory(at: base, withIntermediateDirectories: true)
+        defer { try? fileManager.removeItem(at: base) }
+
+        let storeURL = CloudStoreScope.localLocations(baseDirectory: base).privateStore
+        try fileManager.createDirectory(
+            at: storeURL.deletingLastPathComponent(),
+            withIntermediateDirectories: true
+        )
+        let priming = NSPersistentContainer(
+            name: "HowMuch",
+            managedObjectModel: PersistenceController.managedObjectModel
+        )
+        let description = NSPersistentStoreDescription(url: storeURL)
+        description.shouldAddStoreAsynchronously = false
+        description.setOption(true as NSNumber, forKey: NSPersistentHistoryTrackingKey)
+        priming.persistentStoreDescriptions = [description]
+        priming.loadPersistentStores { _, error in
+            XCTAssertNil(error)
+        }
+        try priming.persistentStoreCoordinator.remove(priming.persistentStoreCoordinator.persistentStores[0])
+
+        try Data().write(
+            to: CloudStoreScope.localLocations(baseDirectory: base).adoptionMarker,
+            options: .atomic
+        )
+
+        let persistence = PersistenceController.makeLocalTestStack(
+            applicationSupportDirectory: base
+        )
+        let ledger = try XCTUnwrap(try persistence.viewContext.fetch(Ledger.fetchRequest()).first)
+        _ = try persistence.saveExpense(
+            nil,
+            to: ledger,
+            category: ledger.activeCategories[0],
+            paymentMethod: ledger.activePaymentMethods[0],
+            values: ExpenseEditValues(
+                merchant: "History",
+                note: "",
+                occurredAt: Date(),
+                spendAmount: 3,
+                spendCurrency: "USD",
+                chargedAmount: 3,
+                chargedCurrency: "USD",
+                reportingAmount: 3,
+                reportingCurrency: "USD",
+                receiptData: nil,
+                receiptFileName: nil,
+                receiptContentType: nil
+            )
+        )
     }
 
     func testLocalPrivateStoreIsCopiedIntoVerifiedAccountWithoutDeletingSources() throws {
@@ -1174,6 +1341,12 @@ final class PersistenceTests: XCTestCase {
         )
         XCTAssertEqual(try Data(contentsOf: local.privateStore), Data("private".utf8))
         XCTAssertEqual(try Data(contentsOf: legacyPrivate), Data("private".utf8))
+        XCTAssertTrue(
+            fileManager.fileExists(
+                atPath: CloudStoreScope.supportDirectory(for: local.privateStore)
+                    .appendingPathComponent("_EXTERNAL_DATA").path
+            )
+        )
 
         try CloudStoreScope.adoptUnscopedStoresIfNeeded(
             baseDirectory: base,
@@ -1189,6 +1362,116 @@ final class PersistenceTests: XCTestCase {
         XCTAssertEqual(try Data(contentsOf: local.privateStore), Data("private".utf8))
         XCTAssertEqual(try Data(contentsOf: legacyPrivate), Data("private".utf8))
         XCTAssertEqual(try Data(contentsOf: legacyShared), Data("shared".utf8))
+    }
+
+    func testAdoptionCopiesExternalBinarySupportDirectory() throws {
+        let fileManager = FileManager.default
+        let base = fileManager.temporaryDirectory
+            .appendingPathComponent("HowMuchSupportAdopt-\(UUID().uuidString)", isDirectory: true)
+        try fileManager.createDirectory(at: base, withIntermediateDirectories: true)
+        defer { try? fileManager.removeItem(at: base) }
+
+        let legacyPrivate = base.appendingPathComponent("private.sqlite")
+        try Data("private".utf8).write(to: legacyPrivate)
+        let legacyBlob = CloudStoreScope.supportDirectory(for: legacyPrivate)
+            .appendingPathComponent("_EXTERNAL_DATA", isDirectory: true)
+            .appendingPathComponent("receipt.bin")
+        try fileManager.createDirectory(
+            at: legacyBlob.deletingLastPathComponent(),
+            withIntermediateDirectories: true
+        )
+        try Data("receipt-bytes".utf8).write(to: legacyBlob)
+        try fileManager.setAttributes([.immutable: true], ofItemAtPath: legacyBlob.path)
+
+        let local = try CloudStoreScope.prepareLocalStoreIfNeeded(
+            baseDirectory: base,
+            fileManager: fileManager
+        )
+        let localBlob = CloudStoreScope.supportDirectory(for: local.privateStore)
+            .appendingPathComponent("_EXTERNAL_DATA", isDirectory: true)
+            .appendingPathComponent("receipt.bin")
+        XCTAssertEqual(try Data(contentsOf: localBlob), Data("receipt-bytes".utf8))
+        XCTAssertEqual(
+            try fileManager.attributesOfItem(atPath: localBlob.path)[.immutable] as? Bool,
+            false
+        )
+
+        try CloudStoreScope.adoptUnscopedStoresIfNeeded(
+            baseDirectory: base,
+            fingerprint: "verified-account",
+            fileManager: fileManager
+        )
+        let scoped = CloudStoreScope.locations(
+            baseDirectory: base,
+            fingerprint: "verified-account"
+        )
+        let scopedBlob = CloudStoreScope.supportDirectory(for: scoped.privateStore)
+            .appendingPathComponent("_EXTERNAL_DATA", isDirectory: true)
+            .appendingPathComponent("receipt.bin")
+        XCTAssertEqual(try Data(contentsOf: scopedBlob), Data("receipt-bytes".utf8))
+        try Data("rewritten-receipt".utf8).write(to: scopedBlob, options: .atomic)
+    }
+
+    func testRepairExternalBinaryStorageCopiesLegacyHiddenSupportFiles() throws {
+        let fileManager = FileManager.default
+        let base = fileManager.temporaryDirectory
+            .appendingPathComponent("HowMuchHiddenSupport-\(UUID().uuidString)", isDirectory: true)
+        try fileManager.createDirectory(at: base, withIntermediateDirectories: true)
+        defer { try? fileManager.removeItem(at: base) }
+
+        let legacyPrivate = base.appendingPathComponent("private.sqlite")
+        try Data("private".utf8).write(to: legacyPrivate)
+        let hiddenBlob = base
+            .appendingPathComponent(".private_SUPPORT", isDirectory: true)
+            .appendingPathComponent("_EXTERNAL_DATA", isDirectory: true)
+            .appendingPathComponent("C37E6413-0668-4366-BBBF-6E1B7A457134")
+        try fileManager.createDirectory(
+            at: hiddenBlob.deletingLastPathComponent(),
+            withIntermediateDirectories: true
+        )
+        try Data("receipt-bytes".utf8).write(to: hiddenBlob)
+
+        let local = try CloudStoreScope.prepareLocalStoreIfNeeded(
+            baseDirectory: base,
+            fileManager: fileManager
+        )
+        let repaired = CloudStoreScope.supportDirectory(for: local.privateStore)
+            .appendingPathComponent("_EXTERNAL_DATA", isDirectory: true)
+            .appendingPathComponent("C37E6413-0668-4366-BBBF-6E1B7A457134")
+        XCTAssertEqual(try Data(contentsOf: repaired), Data("receipt-bytes".utf8))
+    }
+
+    func testAdoptionRewritesReadOnlySQLiteCopies() throws {
+        let fileManager = FileManager.default
+        let base = fileManager.temporaryDirectory
+            .appendingPathComponent("HowMuchReadOnlyAdopt-\(UUID().uuidString)", isDirectory: true)
+        try fileManager.createDirectory(at: base, withIntermediateDirectories: true)
+        defer { try? fileManager.removeItem(at: base) }
+
+        let legacyPrivate = base.appendingPathComponent("private.sqlite")
+        try Data("private".utf8).write(to: legacyPrivate)
+        try fileManager.setAttributes([.posixPermissions: 0o444], ofItemAtPath: legacyPrivate.path)
+
+        let local = try CloudStoreScope.prepareLocalStoreIfNeeded(
+            baseDirectory: base,
+            fileManager: fileManager
+        )
+        XCTAssertTrue(fileManager.isWritableFile(atPath: local.privateStore.path))
+        try Data("rewritten".utf8).write(to: local.privateStore, options: .atomic)
+    }
+
+    func testCloudKitDefaultDirectoryUsesHowMuchSupportFolder() throws {
+        let fileManager = FileManager.default
+        let base = fileManager.temporaryDirectory
+            .appendingPathComponent("HowMuchDefaultDir-\(UUID().uuidString)", isDirectory: true)
+        try fileManager.createDirectory(at: base, withIntermediateDirectories: true)
+        defer { try? fileManager.removeItem(at: base) }
+
+        _ = PersistenceController.makeLocalTestStack(applicationSupportDirectory: base)
+        XCTAssertEqual(
+            HowMuchPersistentContainer.defaultDirectoryURL().standardizedFileURL,
+            base.standardizedFileURL
+        )
     }
 
     func testAdoptionConflictPreservesBothStoreCopies() throws {

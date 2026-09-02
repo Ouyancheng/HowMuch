@@ -72,6 +72,26 @@ struct CachedLedgerAccess {
     let resolvedAt: Date
 }
 
+/// CloudKit still writes sidecars through this class method even when the
+/// store URL is custom. Keep it inside the same writable HowMuch directory.
+final class HowMuchPersistentContainer: NSPersistentCloudKitContainer {
+    private static let overrideLock = NSLock()
+    nonisolated(unsafe) private static var overrideURL: URL?
+
+    static func setDefaultDirectoryOverride(_ url: URL) {
+        overrideLock.lock()
+        overrideURL = url
+        overrideLock.unlock()
+    }
+
+    override class func defaultDirectoryURL() -> URL {
+        overrideLock.lock()
+        let override = overrideURL
+        overrideLock.unlock()
+        return override ?? NSPersistentContainer.defaultDirectoryURL()
+    }
+}
+
 @MainActor
 final class PersistenceController: ObservableObject {
     enum TestStoreType {
@@ -112,7 +132,10 @@ final class PersistenceController: ObservableObject {
         ProcessInfo.processInfo.arguments.contains("-ui-testing")
     }
 
-    let container: NSPersistentCloudKitContainer
+    private(set) var container: NSPersistentContainer
+    var persistentCloudKitContainer: NSPersistentCloudKitContainer? {
+        container as? NSPersistentCloudKitContainer
+    }
     private(set) var privateStore: NSPersistentStore?
     private(set) var sharedStore: NSPersistentStore?
 
@@ -201,10 +224,12 @@ final class PersistenceController: ObservableObject {
         self.applicationSupportDirectoryOverride = applicationSupportDirectory
         // CloudKit is turned on only after a verified account mounts scoped stores.
         self.cloudKitEnabled = false
-        container = NSPersistentCloudKitContainer(
-            name: "HowMuch",
-            managedObjectModel: Self.managedObjectModel
-        )
+        let supportURL = Self.resolvedApplicationSupportURL(override: applicationSupportDirectory)
+        HowMuchPersistentContainer.setDefaultDirectoryOverride(supportURL)
+        // Local and unsigned sessions must not use NSPersistentCloudKitContainer.
+        // That class still writes CloudKit sidecars on save and fails with
+        // NSCocoaErrorDomain 513 when iCloud is unavailable.
+        container = Self.makeContainer(cloudKit: false)
         configureContext()
 
         if testStoreType != nil || useInMemoryStore {
@@ -320,15 +345,17 @@ final class PersistenceController: ObservableObject {
             failCoordinatorUnmount()
             return
         }
+        replaceContainer(cloudKit: false)
         loadState = .loading
         loadError = nil
         diagnostic = nil
         syncActivity = .unavailable
 
         do {
-            let baseURL = applicationSupportURL()
-            try FileManager.default.createDirectory(at: baseURL, withIntermediateDirectories: true)
-            let locations = try CloudStoreScope.prepareLocalStoreIfNeeded(baseDirectory: baseURL)
+            try prepareWritableStoreDirectories()
+            let locations = try CloudStoreScope.prepareLocalStoreIfNeeded(
+                baseDirectory: applicationSupportURL()
+            )
             configureLocalStore(at: locations.privateStore)
         } catch {
             failStoreLoad(
@@ -339,6 +366,7 @@ final class PersistenceController: ObservableObject {
         }
 
         guard loadStores() else { return }
+        repairLoadedStorePermissions()
         loadState = .loaded
         syncActivity = .unavailable
         stackGeneration += 1
@@ -351,6 +379,7 @@ final class PersistenceController: ObservableObject {
             failCoordinatorUnmount()
             return
         }
+        replaceContainer(cloudKit: true)
         offlineLocalStoreActive = false
         cloudKitEnabled = supportsCloudKit
         currentAccountFingerprint = fingerprint
@@ -361,10 +390,9 @@ final class PersistenceController: ObservableObject {
         destructiveSharingReady = false
 
         do {
-            let baseURL = applicationSupportURL()
-            try FileManager.default.createDirectory(at: baseURL, withIntermediateDirectories: true)
+            try prepareWritableStoreDirectories()
             try CloudStoreScope.adoptUnscopedStoresIfNeeded(
-                baseDirectory: baseURL,
+                baseDirectory: applicationSupportURL(),
                 fingerprint: fingerprint
             )
         } catch {
@@ -374,6 +402,7 @@ final class PersistenceController: ObservableObject {
 
         configure(enableCloudKit: true, accountFingerprint: fingerprint)
         guard loadStores() else { return }
+        repairLoadedStorePermissions()
 
         configureQueryGeneration()
         installStoreObservers()
@@ -590,12 +619,28 @@ final class PersistenceController: ObservableObject {
             try context.save()
             saveError = nil
         } catch {
-            logger.error("Save failed: \(error.localizedDescription, privacy: .public)")
-            let message = Self.safeErrorMessage(error)
-            saveError = message
-            diagnostic = PersistenceDiagnostic(kind: .save, message: message)
-            throw PersistenceMutationError.saveFailed(message)
+            if Self.isFilePermissionError(error) {
+                logger.error("Save hit a permission error; repairing store directories and retrying.")
+                try? prepareWritableStoreDirectories()
+                repairLoadedStorePermissions()
+                do {
+                    try context.save()
+                    saveError = nil
+                    return
+                } catch {
+                    throw persistSaveError(error)
+                }
+            }
+            throw persistSaveError(error)
         }
+    }
+
+    private func persistSaveError(_ error: Error) -> PersistenceMutationError {
+        logger.error("Save failed: \(error.localizedDescription, privacy: .public)")
+        let message = Self.safeErrorMessage(error, storeURL: privateStore?.url)
+        saveError = message
+        diagnostic = PersistenceDiagnostic(kind: .save, message: message)
+        return PersistenceMutationError.saveFailed(message)
     }
 
     private func assertWritableChanges(in context: NSManagedObjectContext) throws {
@@ -661,9 +706,37 @@ final class PersistenceController: ObservableObject {
 
     #if DEBUG
     func initializeCloudKitSchema() throws {
-        try container.initializeCloudKitSchema(options: [])
+        guard let persistentCloudKitContainer else {
+            throw CocoaError(.coderValueNotFound)
+        }
+        try persistentCloudKitContainer.initializeCloudKitSchema(options: [])
     }
     #endif
+
+    private static func makeContainer(cloudKit: Bool) -> NSPersistentContainer {
+        if cloudKit {
+            return HowMuchPersistentContainer(
+                name: "HowMuch",
+                managedObjectModel: managedObjectModel
+            )
+        }
+        return NSPersistentContainer(
+            name: "HowMuch",
+            managedObjectModel: managedObjectModel
+        )
+    }
+
+    private func replaceContainer(cloudKit: Bool) {
+        let alreadyCloudKit = container is NSPersistentCloudKitContainer
+        if alreadyCloudKit == cloudKit {
+            return
+        }
+        HowMuchPersistentContainer.setDefaultDirectoryOverride(
+            Self.resolvedApplicationSupportURL(override: applicationSupportDirectoryOverride)
+        )
+        container = Self.makeContainer(cloudKit: cloudKit)
+        configureContext()
+    }
 
     private func configure(enableCloudKit: Bool, accountFingerprint: String?) {
         configuredSharedStoreURLs.removeAll()
@@ -707,27 +780,21 @@ final class PersistenceController: ObservableObject {
             fingerprint: accountFingerprint
         ).directory
         try? FileManager.default.createDirectory(at: storesURL, withIntermediateDirectories: true)
+        let privateURL = storesURL.appendingPathComponent("private.sqlite")
+        try? CloudStoreScope.ensureWritableStoreLocation(privateURL)
 
-        let privateDescription = NSPersistentStoreDescription(url: storesURL.appendingPathComponent("private.sqlite"))
-        privateDescription.configuration = "Default"
-        privateDescription.shouldAddStoreAsynchronously = false
-        privateDescription.setOption(true as NSNumber, forKey: NSPersistentHistoryTrackingKey)
-        privateDescription.setOption(true as NSNumber, forKey: NSPersistentStoreRemoteChangeNotificationPostOptionKey)
-        privateDescription.shouldMigrateStoreAutomatically = true
-        privateDescription.shouldInferMappingModelAutomatically = true
+        let privateDescription = NSPersistentStoreDescription(url: privateURL)
+        configureDiskStoreDescription(privateDescription, trackHistory: true)
 
         if enableCloudKit {
             let privateOptions = NSPersistentCloudKitContainerOptions(containerIdentifier: Self.cloudKitContainerIdentifier)
             privateOptions.databaseScope = .private
             privateDescription.cloudKitContainerOptions = privateOptions
 
-            let sharedDescription = NSPersistentStoreDescription(url: storesURL.appendingPathComponent("shared.sqlite"))
-            sharedDescription.configuration = "Default"
-            sharedDescription.shouldAddStoreAsynchronously = false
-            sharedDescription.setOption(true as NSNumber, forKey: NSPersistentHistoryTrackingKey)
-            sharedDescription.setOption(true as NSNumber, forKey: NSPersistentStoreRemoteChangeNotificationPostOptionKey)
-            sharedDescription.shouldMigrateStoreAutomatically = true
-            sharedDescription.shouldInferMappingModelAutomatically = true
+            let sharedURL = storesURL.appendingPathComponent("shared.sqlite")
+            try? CloudStoreScope.ensureWritableStoreLocation(sharedURL)
+            let sharedDescription = NSPersistentStoreDescription(url: sharedURL)
+            configureDiskStoreDescription(sharedDescription, trackHistory: true)
             let sharedOptions = NSPersistentCloudKitContainerOptions(containerIdentifier: Self.cloudKitContainerIdentifier)
             sharedOptions.databaseScope = .shared
             sharedDescription.cloudKitContainerOptions = sharedOptions
@@ -738,15 +805,66 @@ final class PersistenceController: ObservableObject {
         }
     }
 
+    private func prepareWritableStoreDirectories() throws {
+        _ = try? FileManager.default.url(
+            for: .applicationSupportDirectory,
+            in: .userDomainMask,
+            appropriateFor: nil,
+            create: true
+        )
+        try CloudStoreScope.ensureWritableDirectory(HowMuchPersistentContainer.defaultDirectoryURL())
+        try CloudStoreScope.ensureWritableDirectory(applicationSupportURL())
+    }
+
+    private func repairLoadedStorePermissions() {
+        if let url = privateStore?.url {
+            try? CloudStoreScope.ensureWritableStoreLocation(url, allowRewrite: false)
+        }
+        if let url = sharedStore?.url {
+            try? CloudStoreScope.ensureWritableStoreLocation(url, allowRewrite: false)
+        }
+    }
+
     private func configureLocalStore(at url: URL) {
         configuredSharedStoreURLs.removeAll()
         let description = NSPersistentStoreDescription(url: url)
+        // History tracking cannot be turned off after a store has used it.
+        // The local sqlite is a copy of the CloudKit private store, so opening
+        // it without this key forces Core Data into read-only mode and every
+        // save fails with NSCocoaErrorDomain 513.
+        configureDiskStoreDescription(description, trackHistory: true)
+        description.cloudKitContainerOptions = nil
+        container.persistentStoreDescriptions = [description]
+    }
+
+    private func configureDiskStoreDescription(
+        _ description: NSPersistentStoreDescription,
+        trackHistory: Bool
+    ) {
         description.configuration = "Default"
         description.shouldAddStoreAsynchronously = false
         description.shouldMigrateStoreAutomatically = true
         description.shouldInferMappingModelAutomatically = true
-        description.cloudKitContainerOptions = nil
-        container.persistentStoreDescriptions = [description]
+        if trackHistory {
+            description.setOption(true as NSNumber, forKey: NSPersistentHistoryTrackingKey)
+            description.setOption(
+                true as NSNumber,
+                forKey: NSPersistentStoreRemoteChangeNotificationPostOptionKey
+            )
+        }
+        #if os(iOS)
+        #if targetEnvironment(simulator)
+        description.setOption(
+            FileProtectionType.none as NSObject,
+            forKey: NSPersistentStoreFileProtectionKey
+        )
+        #else
+        description.setOption(
+            FileProtectionType.completeUntilFirstUserAuthentication as NSObject,
+            forKey: NSPersistentStoreFileProtectionKey
+        )
+        #endif
+        #endif
     }
 
     private func testStoreDescription(type: TestStoreType, url: URL) -> NSPersistentStoreDescription {
@@ -881,9 +999,38 @@ final class PersistenceController: ObservableObject {
         diagnostic = PersistenceDiagnostic(kind: .storeLoad, message: message)
     }
 
-    nonisolated private static func safeErrorMessage(_ error: Error) -> String {
+    nonisolated private static func isFilePermissionError(_ error: Error) -> Bool {
+        var current: NSError? = error as NSError
+        while let nsError = current {
+            if nsError.domain == NSCocoaErrorDomain, nsError.code == CocoaError.fileWriteNoPermission.rawValue {
+                return true
+            }
+            if nsError.domain == NSPOSIXErrorDomain, nsError.code == Int(EACCES) || nsError.code == Int(EPERM) {
+                return true
+            }
+            current = nsError.userInfo[NSUnderlyingErrorKey] as? NSError
+        }
+        return false
+    }
+
+    nonisolated private static func safeErrorMessage(_ error: Error, storeURL: URL? = nil) -> String {
         let nsError = error as NSError
-        return "\(nsError.localizedDescription) (\(nsError.domain) \(nsError.code))"
+        var parts = ["\(nsError.localizedDescription) (\(nsError.domain) \(nsError.code))"]
+        if let path = nsError.userInfo[NSFilePathErrorKey] as? String, !path.isEmpty {
+            parts.append(path)
+        } else if let url = nsError.userInfo[NSURLErrorKey] as? URL {
+            parts.append(url.path)
+        }
+        if let underlying = nsError.userInfo[NSUnderlyingErrorKey] as? NSError {
+            parts.append("\(underlying.domain) \(underlying.code)")
+            if let path = underlying.userInfo[NSFilePathErrorKey] as? String, !path.isEmpty {
+                parts.append(path)
+            }
+        }
+        if let storeURL {
+            parts.append(storeURL.path)
+        }
+        return parts.joined(separator: " — ")
     }
 
     private func installStoreObservers() {
@@ -921,7 +1068,7 @@ final class PersistenceController: ObservableObject {
             }
             let endDate = event.endDate
             let succeeded = event.succeeded
-            let errorMessage = event.error.map(Self.safeErrorMessage)
+            let errorMessage = event.error.map { Self.safeErrorMessage($0) }
             Task { @MainActor in
                 self?.recordCloudEvent(
                     kind: eventKind,
@@ -1184,11 +1331,22 @@ final class PersistenceController: ObservableObject {
     }
 
     private func applicationSupportURL() -> URL {
-        if let applicationSupportDirectoryOverride {
-            return applicationSupportDirectoryOverride
+        Self.resolvedApplicationSupportURL(override: applicationSupportDirectoryOverride)
+    }
+
+    private static func resolvedApplicationSupportURL(override: URL?) -> URL {
+        if let override {
+            return override
         }
-        let base = FileManager.default.urls(for: .applicationSupportDirectory, in: .userDomainMask).first
-            ?? FileManager.default.temporaryDirectory
+        let created = try? FileManager.default.url(
+            for: .applicationSupportDirectory,
+            in: .userDomainMask,
+            appropriateFor: nil,
+            create: true
+        )
+        let base = created
+            ?? FileManager.default.urls(for: .applicationSupportDirectory, in: .userDomainMask).first
+            ?? NSPersistentContainer.defaultDirectoryURL()
         return base.appendingPathComponent("HowMuch", isDirectory: true)
     }
 }
